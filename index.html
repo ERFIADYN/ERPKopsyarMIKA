@@ -170,6 +170,11 @@
     }
     .page-heading h1 { margin: 0; font-size: 22px; letter-spacing: -.3px; }
     .page-heading p { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
+    .page-heading .report-date-range {
+      margin-top: 7px;
+      color: var(--blue);
+      font-weight: 700;
+    }
     .heading-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
     .card {
@@ -754,7 +759,11 @@
 
         <section class="page" id="page-report">
           <div class="page-heading">
-            <div><h1>Laporan Keuangan</h1><p>Mutasi kas dan posisi neraca koperasi.</p></div>
+            <div>
+              <h1>Laporan Keuangan</h1>
+              <p>Mutasi kas dan posisi neraca koperasi.</p>
+              <p class="report-date-range" id="reportDateRange">Periode: -</p>
+            </div>
             <div class="heading-actions no-print"><button class="btn btn-outline" id="printReportBtn">Cetak / Simpan PDF</button></div>
           </div>
           <div class="card filter-card no-print">
@@ -857,6 +866,8 @@
       savings: [],
       loans: [],
       charts: {},
+      installments: [],
+      currentHistoryLoan: null,
       currentPage: 'dashboard',
       loading: 0,
       modalSubmit: null
@@ -887,7 +898,9 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
     const formatDate = value => {
       if (!value) return '-';
-      const parts = String(value).slice(0, 10).split('-');
+      const text = String(value).slice(0, 10);
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(text)) return text;
+      const parts = text.split('-');
       if (parts.length !== 3) return escapeHtml(value);
       return `${parts[2]}/${parts[1]}/${parts[0]}`;
     };
@@ -1451,6 +1464,8 @@
         setLoading(true, 'Memuat riwayat angsuran...');
         const response = await rpc('getInstallmentHistory', id);
         const rows = response.items || [];
+        state.installments = rows;
+        state.currentHistoryLoan = response.loan;
         openContentModal({
           title: `Riwayat Pembayaran ${escapeHtml(id)}`,
           large: true,
@@ -1461,15 +1476,70 @@
             <div class="summary-item"><span>Status</span><strong>${escapeHtml(response.loan['Status'])}</strong></div>
           </div></div>
           <div class="table-scroll"><table>
-            <thead><tr><th>Tanggal</th><th>Keterangan</th><th>Jumlah Bayar</th><th>Sisa Pinjaman</th><th>Struk</th></tr></thead>
+            <thead><tr><th>Tanggal</th><th>Keterangan</th><th>Jumlah Bayar</th><th>Sisa Pinjaman</th><th>Aksi</th></tr></thead>
             <tbody>${rows.length ? rows.map(item => `<tr>
               <td>${formatDate(item['Tanggal Bayar'])}</td>
               <td class="wrap">${escapeHtml(item['Keterangan'] || `Angsuran ke ${item['Angsuran Ke']}`)}</td>
               <td class="money in">${money(item['Jumlah Bayar'])}</td><td class="money">${money(item['Sisa Pinjaman Setelah Bayar'])}</td>
-              <td><button class="btn btn-soft btn-mini" data-action="installment-receipt" data-id="${escapeHtml(item['ID Angsuran'])}">Download PDF</button></td>
+              <td><div class="actions">
+                ${!/kompensasi simpanan/i.test(String(item['Keterangan'] || '')) ? `
+                  <button class="btn btn-soft btn-mini" data-action="edit-installment" data-id="${escapeHtml(item['ID Angsuran'])}" data-loan-id="${escapeHtml(id)}">Edit</button>
+                  <button class="btn btn-danger btn-mini" data-action="delete-installment" data-id="${escapeHtml(item['ID Angsuran'])}" data-loan-id="${escapeHtml(id)}">Hapus</button>
+                ` : ''}
+                <button class="btn btn-outline btn-mini" data-action="installment-receipt" data-id="${escapeHtml(item['ID Angsuran'])}">Download</button>
+              </div></td>
             </tr>`).join('') : emptyRow(5, 'Belum ada pembayaran angsuran.')}</tbody>
           </table></div>`
         });
+      } catch (error) {
+        friendlyError(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    function openEditInstallment(id, loanId) {
+      const item = state.installments.find(row => row['ID Angsuran'] === id);
+      if (!item) return toast('Data angsuran tidak ditemukan.', 'error');
+      if (/kompensasi simpanan/i.test(String(item['Keterangan'] || ''))) {
+        return toast('Angsuran kompensasi tidak dapat diedit.', 'error');
+      }
+      openFormModal({
+        title: `Edit Pembayaran ${escapeHtml(id)}`,
+        submitLabel: 'Simpan Perubahan',
+        html: `<input type="hidden" name="id" value="${escapeHtml(id)}">
+          <div class="form-grid">
+            <div class="field"><label>Tanggal Bayar *</label><input name="date" type="date" value="${escapeHtml(String(item['Tanggal Bayar']).slice(0, 10))}" required></div>
+            <div class="field"><label>Nama Anggota</label><input value="${escapeHtml(item['Nama Anggota'])}" disabled></div>
+            <div class="field full"><label>Jumlah Bayar *</label><input name="amount" type="number" min="1" value="${number(item['Jumlah Bayar'])}" required></div>
+            <div class="field full"><label>Keterangan</label><textarea name="notes">${escapeHtml(item['Keterangan'] || '')}</textarea></div>
+          </div>`,
+        onSubmit: async data => {
+          const result = await rpc('updateInstallment', data);
+          closeModal();
+          toast(result.message);
+          await loadLoans();
+          await openLoanHistory(result.loanId || loanId);
+        }
+      });
+    }
+
+    async function deleteInstallment(id, loanId) {
+      const item = state.installments.find(row => row['ID Angsuran'] === id);
+      if (!item) return toast('Data angsuran tidak ditemukan.', 'error');
+      if (/kompensasi simpanan/i.test(String(item['Keterangan'] || ''))) {
+        return toast('Angsuran kompensasi tidak dapat dihapus.', 'error');
+      }
+      const confirmed = window.confirm(
+        `Hapus pembayaran ${id} sebesar ${money(item['Jumlah Bayar'])}?\n\nSisa pinjaman dan mutasi kas akan disesuaikan otomatis.`
+      );
+      if (!confirmed) return;
+      try {
+        setLoading(true, 'Menghapus pembayaran...');
+        const result = await rpc('deleteInstallment', id);
+        toast(result.message);
+        await loadLoans();
+        await openLoanHistory(result.loanId || loanId);
       } catch (error) {
         friendlyError(error);
       } finally {
@@ -1525,7 +1595,9 @@
       $('#reportAdmin').textContent = money(s.adminIncome);
       $('#reportNet').textContent = money(s.netCashFlow);
       $('#reportNet').style.color = s.netCashFlow >= 0 ? 'var(--green)' : 'var(--red)';
-      $('#reportPeriodText').textContent = `${formatDate(report.period.start)} - ${formatDate(report.period.end)}`;
+      const reportRange = `${formatDate(report.period.start)} - ${formatDate(report.period.end)}`;
+      $('#reportPeriodText').textContent = reportRange;
+      $('#reportDateRange').textContent = `Periode: ${reportRange}`;
       $('#reportTable').innerHTML = report.mutations.length ? report.mutations.map(row => `
         <tr><td>${formatDate(row.date)}</td><td>${escapeHtml(row.category)}</td><td class="wrap">${escapeHtml(row.description)}</td>
         <td class="money in">${row.incoming ? money(row.incoming) : '-'}</td>
@@ -1631,6 +1703,8 @@
       if (action.dataset.action === 'saving-receipt') downloadReceipt('generateSavingReceiptPdf', id);
       if (action.dataset.action === 'pay-loan') openPayLoan(id);
       if (action.dataset.action === 'loan-history') openLoanHistory(id);
+      if (action.dataset.action === 'edit-installment') openEditInstallment(id, action.dataset.loanId);
+      if (action.dataset.action === 'delete-installment') deleteInstallment(id, action.dataset.loanId);
       if (action.dataset.action === 'installment-receipt') downloadReceipt('generateInstallmentReceiptPdf', id);
     });
 
