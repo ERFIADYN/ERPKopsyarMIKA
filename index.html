@@ -1228,7 +1228,13 @@
             <td>${badge(item['Tipe Transaksi'])}</td>
             <td class="money ${item['Tipe Transaksi'] === 'Setor Tunai' ? 'in' : 'out'}">${money(item['Jumlah'])}</td>
             <td class="wrap">${escapeHtml(item['Keterangan'] || '-')}</td>
-            <td><button class="btn btn-soft btn-mini" data-action="saving-receipt" data-id="${escapeHtml(item['ID Transaksi'])}">Download PDF</button></td>
+            <td><div class="actions">
+              ${!/penutupan saldo karena anggota keluar/i.test(String(item['Keterangan'] || '')) ? `
+                <button class="btn btn-soft btn-mini" data-action="edit-saving" data-id="${escapeHtml(item['ID Transaksi'])}">Edit</button>
+                <button class="btn btn-danger btn-mini" data-action="delete-saving" data-id="${escapeHtml(item['ID Transaksi'])}">Hapus</button>
+              ` : ''}
+              <button class="btn btn-outline btn-mini" data-action="saving-receipt" data-id="${escapeHtml(item['ID Transaksi'])}">PDF</button>
+            </div></td>
           </tr>`).join('') : emptyRow(8, 'Belum ada transaksi simpanan yang sesuai filter.');
       } catch (error) {
         $('#savingTable').innerHTML = emptyRow(8, 'Transaksi simpanan gagal dimuat.');
@@ -1262,6 +1268,55 @@
           loadSavings();
         }
       });
+    }
+
+    function openEditSaving(id) {
+      const transaction = state.savings.find(item => item['ID Transaksi'] === id);
+      if (!transaction) return toast('Transaksi simpanan tidak ditemukan.', 'error');
+      if (/penutupan saldo karena anggota keluar/i.test(String(transaction['Keterangan'] || ''))) {
+        return toast('Transaksi penutupan anggota tidak dapat diedit.', 'error');
+      }
+      openFormModal({
+        title: `Edit Transaksi ${escapeHtml(id)}`,
+        submitLabel: 'Simpan Perubahan',
+        html: `<input type="hidden" name="id" value="${escapeHtml(id)}">
+          <div class="form-grid">
+            <div class="field"><label>Tanggal Transaksi *</label><input name="date" type="date" value="${escapeHtml(transaction['Tanggal'])}" required></div>
+            <div class="field"><label>Anggota</label><input value="${escapeHtml(transaction['ID Anggota'])} - ${escapeHtml(transaction['Nama Anggota'])}" disabled></div>
+            <div class="field"><label>Jenis Simpanan *</label><select name="savingType" required>${['Simpanan Pokok','Simpanan Wajib','Simpanan Sukarela'].map(value => `<option ${value === transaction['Jenis Simpanan'] ? 'selected' : ''}>${value}</option>`).join('')}</select></div>
+            <div class="field"><label>Tipe Transaksi *</label><select name="transactionType" required>${['Setor Tunai','Tarik Tunai'].map(value => `<option ${value === transaction['Tipe Transaksi'] ? 'selected' : ''}>${value}</option>`).join('')}</select></div>
+            <div class="field full"><label>Jumlah *</label><input name="amount" type="number" min="1" value="${number(transaction['Jumlah'])}" required></div>
+            <div class="field full"><label>Keterangan</label><textarea name="notes">${escapeHtml(transaction['Keterangan'] || '')}</textarea></div>
+          </div>`,
+        onSubmit: async data => {
+          await rpc('updateSavingTransaction', data);
+          closeModal();
+          toast('Transaksi simpanan dan mutasi kas berhasil diperbarui.');
+          loadSavings();
+        }
+      });
+    }
+
+    async function deleteSaving(id) {
+      const transaction = state.savings.find(item => item['ID Transaksi'] === id);
+      if (!transaction) return toast('Transaksi simpanan tidak ditemukan.', 'error');
+      if (/penutupan saldo karena anggota keluar/i.test(String(transaction['Keterangan'] || ''))) {
+        return toast('Transaksi penutupan anggota tidak dapat dihapus.', 'error');
+      }
+      const confirmed = window.confirm(
+        `Hapus transaksi ${id} milik ${transaction['Nama Anggota']} sebesar ${money(transaction['Jumlah'])}?\n\nMutasi kas terkait juga akan dihapus.`
+      );
+      if (!confirmed) return;
+      try {
+        setLoading(true, 'Menghapus transaksi...');
+        const result = await rpc('deleteSavingTransaction', id);
+        toast(result.message);
+        loadSavings();
+      } catch (error) {
+        friendlyError(error);
+      } finally {
+        setLoading(false);
+      }
     }
 
     async function loadMemberSavingSummary(memberId) {
@@ -1571,6 +1626,8 @@
       const id = action.dataset.id;
       if (action.dataset.action === 'edit-member') openEditMember(id);
       if (action.dataset.action === 'exit-member') openMemberExit(id);
+      if (action.dataset.action === 'edit-saving') openEditSaving(id);
+      if (action.dataset.action === 'delete-saving') deleteSaving(id);
       if (action.dataset.action === 'saving-receipt') downloadReceipt('generateSavingReceiptPdf', id);
       if (action.dataset.action === 'pay-loan') openPayLoan(id);
       if (action.dataset.action === 'loan-history') openLoanHistory(id);
