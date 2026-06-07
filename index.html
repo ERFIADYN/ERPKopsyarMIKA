@@ -297,6 +297,7 @@
       white-space: nowrap;
     }
     .badge-green { color: #08744d; background: #dcf6e9; }
+    .badge-green-soft { color: #347762; background: #edf9f4; border: 1px solid #d8f0e7; }
     .badge-red { color: #b52f3a; background: #ffe2e5; }
     .badge-gray { color: #68758a; background: #edf0f4; }
     .badge-blue { color: #0d5ebd; background: #e1efff; }
@@ -741,7 +742,7 @@
           </div>
           <div class="card filter-card no-print">
             <div class="filter-grid compact">
-              <div class="field"><label>Pencarian</label><input id="loanQuery" placeholder="Nama anggota atau ID pinjaman"></div>
+              <div class="field"><label>Pencarian</label><input id="loanQuery" placeholder="Nama peminjam atau ID pinjaman"></div>
               <div class="field"><label>Status</label><select id="loanStatus"><option>Semua</option><option>Aktif</option><option>Lunas</option><option>Macet</option></select></div>
               <div class="field"><label>Dari Tanggal</label><input id="loanStart" type="date"></div>
               <div class="field"><label>Sampai Tanggal</label><input id="loanEnd" type="date"></div>
@@ -751,7 +752,7 @@
           <div class="card table-card">
             <div class="table-head"><h2>Daftar Pembiayaan</h2><span id="loanCount">0 data</span></div>
             <div class="table-scroll"><table>
-              <thead><tr><th>ID Pinjaman</th><th>Tanggal</th><th>Nama Anggota</th><th>Pokok</th><th>Tenor</th><th>Margin</th><th>Angsuran/Bulan</th><th>Sisa Pinjaman</th><th>Status</th><th>Aksi</th></tr></thead>
+              <thead><tr><th>ID Pinjaman</th><th>Tanggal</th><th>Nama Peminjam</th><th>Pokok</th><th>Tenor</th><th>Persentase</th><th>Margin Dikenakan</th><th>Angsuran/Bulan</th><th>Sisa Pinjaman</th><th>Status</th><th>Aksi</th></tr></thead>
               <tbody id="loanTable"></tbody>
             </table></div>
           </div>
@@ -834,7 +835,7 @@
                 <div class="form-grid" style="grid-template-columns:1fr">
                   <div class="field"><label>Simpanan Pokok</label><input name="simpanan_pokok" type="number" min="0" required></div>
                   <div class="field"><label>Simpanan Wajib</label><input name="simpanan_wajib" type="number" min="0" required></div>
-                  <div class="field"><label>Margin Pinjaman (%)</label><input name="margin_pinjaman" type="number" min="0" step="0.01" required></div>
+                  <div class="field"><label>Persentase Pembiayaan (%)</label><input name="margin_pinjaman" type="number" min="0" step="0.01" required></div>
                   <div class="field"><label>Biaya Admin</label><input name="biaya_admin" type="number" min="0" required></div>
                 </div>
               </div>
@@ -893,6 +894,10 @@
       style: 'currency', currency: 'IDR', maximumFractionDigits: 0
     }).format(Number(value) || 0);
     const number = value => Number(value) || 0;
+    const formatPercentage = value => `${number(value).toLocaleString('id-ID', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2
+    })}%`;
     const escapeHtml = value => String(value ?? '')
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
@@ -935,13 +940,16 @@
       console.error(error);
     }
 
-    function badge(status) {
+    function badge(status, context) {
       const classes = {
         Aktif: 'badge-green', Lunas: 'badge-green', Keluar: 'badge-red',
         Nonaktif: 'badge-gray', Macet: 'badge-red',
         'Setor Tunai': 'badge-green', 'Tarik Tunai': 'badge-orange'
       };
-      return `<span class="badge ${classes[status] || 'badge-blue'}">${escapeHtml(status || '-')}</span>`;
+      const badgeClass = context === 'loan' && status === 'Aktif'
+        ? 'badge-green-soft'
+        : (classes[status] || 'badge-blue');
+      return `<span class="badge ${badgeClass}">${escapeHtml(status || '-')}</span>`;
     }
 
     function emptyRow(columns, message) {
@@ -1353,7 +1361,7 @@
     }
 
     async function loadLoans() {
-      $('#loanTable').innerHTML = emptyRow(10, 'Memuat data pembiayaan...');
+      $('#loanTable').innerHTML = emptyRow(11, 'Memuat data pembiayaan...');
       try {
         const response = await rpc('getLoans', {
           query: $('#loanQuery').value,
@@ -1370,38 +1378,57 @@
             <td>${escapeHtml(loan['Nama Anggota'])}</td>
             <td class="money">${money(loan['Pokok Pinjaman'])}</td>
             <td>${number(loan['Tenor'])} bulan</td>
-            <td>${number(loan['Margin/Bunga']).toLocaleString('id-ID')}%</td>
+            <td>${formatPercentage(loan['Persentase'])}</td>
+            <td><strong>${formatPercentage(loan['Persentase Margin Dikenakan'])}</strong></td>
             <td class="money">${money(loan['Angsuran Per Bulan'])}</td>
             <td class="money">${money(loan['Sisa Pinjaman'])}</td>
-            <td>${badge(loan['Status'])}</td>
+            <td>${badge(loan['Status'], 'loan')}</td>
             <td><div class="actions">
               ${loan['Status'] === 'Aktif' ? `<button class="btn btn-success btn-mini" data-action="pay-loan" data-id="${escapeHtml(loan['ID Pinjaman'])}">Bayar</button>` : ''}
               <button class="btn btn-soft btn-mini" data-action="loan-history" data-id="${escapeHtml(loan['ID Pinjaman'])}">Riwayat</button>
             </div></td>
-          </tr>`).join('') : emptyRow(10, 'Belum ada pembiayaan yang sesuai filter.');
+          </tr>`).join('') : emptyRow(11, 'Belum ada pembiayaan yang sesuai filter.');
       } catch (error) {
-        $('#loanTable').innerHTML = emptyRow(10, 'Data pembiayaan gagal dimuat.');
+        $('#loanTable').innerHTML = emptyRow(11, 'Data pembiayaan gagal dimuat.');
         friendlyError(error);
       }
     }
 
     function openAddLoan() {
-      if (!state.activeMembers.length) return toast('Belum ada anggota aktif untuk pembiayaan.', 'error');
+      const defaultBorrowerType = state.activeMembers.length ? 'member' : 'nonmember';
       openFormModal({
         title: 'Pengajuan Pinjaman Syariah',
         submitLabel: 'Simpan Pinjaman',
         html: `<div class="form-grid">
           <div class="field"><label>Tanggal Pengajuan *</label><input name="date" type="date" value="${today()}" required></div>
-          <div class="field"><label>Anggota Aktif *</label><select name="memberId" required>${memberOptions()}</select></div>
+          <div class="field"><label>Jenis Peminjam *</label><select name="borrowerType" id="loanBorrowerType" required>
+            <option value="member" ${defaultBorrowerType === 'member' ? 'selected' : ''}>Anggota</option>
+            <option value="nonmember" ${defaultBorrowerType === 'nonmember' ? 'selected' : ''}>Non Anggota</option>
+          </select></div>
+          <div class="field full" id="loanMemberField"><label>Anggota Aktif *</label><select name="memberId" id="loanMemberSelect">${memberOptions()}</select></div>
+          <div class="field full" id="loanNonmemberField"><label>Nama Peminjam Non Anggota *</label><input name="borrowerName" id="loanBorrowerName" maxlength="150" placeholder="Masukkan nama lengkap peminjam"></div>
           <div class="field"><label>Pokok Pinjaman *</label><input name="principal" id="loanPrincipal" type="number" min="1" required></div>
           <div class="field"><label>Tenor (bulan) *</label><input name="tenor" id="loanTenor" type="number" min="1" max="360" value="12" required></div>
-          <div class="field"><label>Margin (%) *</label><input name="margin" id="loanMargin" type="number" min="0" step="0.01" value="${number(state.settings.margin_pinjaman)}" required></div>
+          <div class="field"><label>Persentase (%) *</label><input name="percentage" id="loanPercentage" type="number" min="0" step="0.01" value="${number(state.settings.margin_pinjaman)}" required></div>
           <div class="field"><label>Biaya Admin *</label><input name="adminFee" id="loanAdmin" type="number" min="0" value="${number(state.settings.biaya_admin)}" required></div>
           <div class="full summary-box" id="loanEstimate"></div>
           <div class="field full"><label>Keterangan</label><textarea name="notes"></textarea></div>
         </div>`,
         onReady: () => {
-          ['loanPrincipal','loanTenor','loanMargin','loanAdmin'].forEach(id => $(`#${id}`).addEventListener('input', updateLoanEstimate));
+          const toggleBorrowerFields = () => {
+            const isNonmember = $('#loanBorrowerType').value === 'nonmember';
+            $('#loanMemberField').style.display = isNonmember ? 'none' : 'block';
+            $('#loanNonmemberField').style.display = isNonmember ? 'block' : 'none';
+            $('#loanMemberSelect').disabled = isNonmember;
+            $('#loanMemberSelect').required = !isNonmember;
+            $('#loanBorrowerName').disabled = !isNonmember;
+            $('#loanBorrowerName').required = isNonmember;
+          };
+          $('#loanBorrowerType').addEventListener('change', toggleBorrowerFields);
+          ['loanPrincipal','loanTenor','loanPercentage','loanAdmin'].forEach(id => {
+            $(`#${id}`).addEventListener('input', updateLoanEstimate);
+          });
+          toggleBorrowerFields();
           updateLoanEstimate();
         },
         onSubmit: async data => {
@@ -1416,13 +1443,16 @@
     function updateLoanEstimate() {
       const principal = number($('#loanPrincipal')?.value);
       const tenor = Math.max(1, number($('#loanTenor')?.value));
-      const margin = number($('#loanMargin')?.value);
+      const percentage = number($('#loanPercentage')?.value);
       const admin = number($('#loanAdmin')?.value);
-      const marginNominal = principal * margin / 100;
+      const appliedMargin = percentage * tenor / 12;
+      const marginNominal = principal * appliedMargin / 100;
       const total = principal + marginNominal + admin;
       const installment = total / tenor;
       $('#loanEstimate').innerHTML = `<div class="summary-grid">
-        <div class="summary-item"><span>Margin Nominal</span><strong>${money(marginNominal)}</strong></div>
+        <div class="summary-item"><span>Persentase</span><strong>${formatPercentage(percentage)}</strong></div>
+        <div class="summary-item"><span>Margin Dikenakan</span><strong>${formatPercentage(appliedMargin)}</strong></div>
+        <div class="summary-item"><span>Nominal Margin</span><strong>${money(marginNominal)}</strong></div>
         <div class="summary-item"><span>Biaya Admin</span><strong>${money(admin)}</strong></div>
         <div class="summary-item"><span>Total Tagihan</span><strong>${money(total)}</strong></div>
         <div class="summary-item"><span>Angsuran / Bulan</span><strong>${money(installment)}</strong></div>
@@ -1439,7 +1469,7 @@
         submitClass: 'btn-success',
         html: `<input type="hidden" name="loanId" value="${escapeHtml(id)}">
           <div class="summary-box" style="margin-bottom:14px"><div class="summary-grid">
-            <div class="summary-item"><span>Nama Anggota</span><strong>${escapeHtml(loan['Nama Anggota'])}</strong></div>
+            <div class="summary-item"><span>Nama Peminjam</span><strong>${escapeHtml(loan['Nama Anggota'])}</strong></div>
             <div class="summary-item"><span>Total Tagihan</span><strong>${money(loan['Total Tagihan'])}</strong></div>
             <div class="summary-item"><span>Sudah Dibayar</span><strong>${money(loan['Sudah Dibayar'])}</strong></div>
             <div class="summary-item"><span>Sisa Pinjaman</span><strong>${money(loan['Sisa Pinjaman'])}</strong></div>
@@ -1470,7 +1500,7 @@
           title: `Riwayat Pembayaran ${escapeHtml(id)}`,
           large: true,
           html: `<div class="summary-box" style="margin-bottom:14px"><div class="summary-grid">
-            <div class="summary-item"><span>Nama Anggota</span><strong>${escapeHtml(response.loan['Nama Anggota'])}</strong></div>
+            <div class="summary-item"><span>Nama Peminjam</span><strong>${escapeHtml(response.loan['Nama Anggota'])}</strong></div>
             <div class="summary-item"><span>Total Tagihan</span><strong>${money(response.loan['Total Tagihan'])}</strong></div>
             <div class="summary-item"><span>Sisa Pinjaman</span><strong>${money(response.loan['Sisa Pinjaman'])}</strong></div>
             <div class="summary-item"><span>Status</span><strong>${escapeHtml(response.loan['Status'])}</strong></div>
@@ -1510,7 +1540,7 @@
         html: `<input type="hidden" name="id" value="${escapeHtml(id)}">
           <div class="form-grid">
             <div class="field"><label>Tanggal Bayar *</label><input name="date" type="date" value="${escapeHtml(String(item['Tanggal Bayar']).slice(0, 10))}" required></div>
-            <div class="field"><label>Nama Anggota</label><input value="${escapeHtml(item['Nama Anggota'])}" disabled></div>
+            <div class="field"><label>Nama Peminjam</label><input value="${escapeHtml(item['Nama Anggota'])}" disabled></div>
             <div class="field full"><label>Jumlah Bayar *</label><input name="amount" type="number" min="1" value="${number(item['Jumlah Bayar'])}" required></div>
             <div class="field full"><label>Keterangan</label><textarea name="notes">${escapeHtml(item['Keterangan'] || '')}</textarea></div>
           </div>`,

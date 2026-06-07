@@ -6,7 +6,7 @@
 const SPREADSHEET_ID = '1rsX3XUeippTQCUlgrA_UdKf-iRB2-vmkC-X8ji8cMWQ';
 const APP_TIMEZONE = 'Asia/Jakarta';
 const DEFAULT_OFFICER = 'Administrator';
-const SETUP_VERSION = 'MIKA_SCHEMA_2026_06_V1';
+const SETUP_VERSION = 'MIKA_SCHEMA_2026_06_V2';
 const DEFAULT_LOGO_URL =
   'https://raw.githubusercontent.com/ERFIADYN/ERPKopsyarMIKA/main/kami.jpg-removebg-preview.png';
 const EMBEDDED_LOGO_BASE64 = 'iVBORw0KGgoAAAANSUhEUgAAASEAAAErCAYAAACRhjV9AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAA' +
@@ -2060,8 +2060,9 @@ const SCHEMA = {
   ],
   Pinjaman: [
     'ID Pinjaman', 'Tanggal Pengajuan', 'ID Anggota', 'Nama Anggota',
-    'Pokok Pinjaman', 'Tenor', 'Margin/Bunga', 'Biaya Admin', 'Total Tagihan',
-    'Angsuran Per Bulan', 'Sisa Pinjaman', 'Status', 'Keterangan'
+    'Pokok Pinjaman', 'Tenor', 'Persentase', 'Persentase Margin Dikenakan',
+    'Biaya Admin', 'Total Tagihan', 'Angsuran Per Bulan', 'Sisa Pinjaman',
+    'Status', 'Keterangan'
   ],
   Angsuran: [
     'ID Angsuran', 'Tanggal Bayar', 'ID Pinjaman', 'ID Anggota', 'Nama Anggota',
@@ -2075,6 +2076,23 @@ const SCHEMA = {
   Pengaturan: ['Key', 'Value', 'Deskripsi']
 };
 
+const LOAN_COLUMN = {
+  ID: 1,
+  DATE: 2,
+  MEMBER_ID: 3,
+  BORROWER_NAME: 4,
+  PRINCIPAL: 5,
+  TENOR: 6,
+  PERCENTAGE: 7,
+  APPLIED_MARGIN: 8,
+  ADMIN_FEE: 9,
+  TOTAL_BILL: 10,
+  INSTALLMENT: 11,
+  REMAINING: 12,
+  STATUS: 13,
+  NOTES: 14
+};
+
 const DEFAULT_SETTINGS = [
   ['nama_koperasi', 'Koperasi Syariah MIKA', 'Nama resmi koperasi'],
   ['alamat_koperasi', 'Alamat koperasi belum diatur', 'Alamat lengkap koperasi'],
@@ -2083,7 +2101,7 @@ const DEFAULT_SETTINGS = [
   ['logo_url', '', 'URL logo koperasi'],
   ['simpanan_pokok', '165000', 'Simpanan pokok anggota baru'],
   ['simpanan_wajib', '50000', 'Simpanan wajib bulanan'],
-  ['margin_pinjaman', '5', 'Persentase margin pembiayaan'],
+  ['margin_pinjaman', '5', 'Persentase tahunan pembiayaan'],
   ['biaya_admin', '20000', 'Biaya administrasi pembiayaan']
 ];
 
@@ -2265,10 +2283,39 @@ function migrateLegacyRows_(sheetName, values) {
       var memberId = value(row, ['ID Anggota', 'ID_Anggota']);
       var principal = number_(value(row, ['Pokok Pinjaman', 'Plafon']));
       var tenor = number_(value(row, ['Tenor', 'Tenor_Bulan']));
-      var margin = number_(value(row, ['Margin/Bunga', 'Bunga_Persen']));
-      if (margin > 0 && margin <= 1) margin *= 100;
+      var percentageValue = value(row, ['Persentase']);
+      var appliedMarginValue = value(row, [
+        'Persentase Margin Dikenakan', 'Margin Dikenakan'
+      ]);
+      var legacyMarginValue = value(row, ['Margin/Bunga', 'Bunga_Persen']);
+      var hasExplicitPercentage = percentageValue !== '' && percentageValue !== null;
+      var hasExplicitAppliedMargin =
+        appliedMarginValue !== '' && appliedMarginValue !== null;
+      var percentage;
+      var appliedMargin;
+      if (hasExplicitAppliedMargin) {
+        appliedMargin = normalizePercentage_(appliedMarginValue);
+        percentage = hasExplicitPercentage
+          ? normalizePercentage_(percentageValue)
+          : annualPercentageFromApplied_(appliedMargin, tenor);
+      } else if (hasExplicitPercentage) {
+        percentage = normalizePercentage_(percentageValue);
+        appliedMargin = calculateAppliedMargin_(percentage, tenor);
+      } else {
+        appliedMargin = normalizePercentage_(legacyMarginValue);
+        percentage = annualPercentageFromApplied_(appliedMargin, tenor);
+      }
       var admin = number_(value(row, ['Biaya Admin']));
-      var total = number_(value(row, ['Total Tagihan', 'Total_Tagihan'])) || principal;
+      var existingTotal = number_(value(row, ['Total Tagihan', 'Total_Tagihan']));
+      if (!hasExplicitAppliedMargin && !hasExplicitPercentage &&
+          existingTotal > 0 && principal > 0 &&
+          existingTotal >= principal + admin) {
+        appliedMargin = roundPercentage_(
+          (existingTotal - principal - admin) * 100 / principal
+        );
+        percentage = annualPercentageFromApplied_(appliedMargin, tenor);
+      }
+      var total = existingTotal || principal + (principal * appliedMargin / 100) + admin;
       var remaining = number_(value(row, ['Sisa Pinjaman', 'Sisa_Tagihan']));
       return [
         value(row, ['ID Pinjaman', 'ID_Pinjaman']),
@@ -2277,10 +2324,12 @@ function migrateLegacyRows_(sheetName, values) {
         loanMemberMap[memberId] || value(row, ['Nama Anggota', 'Nama_Peminjam']),
         principal,
         tenor,
-        margin,
+        percentage,
+        appliedMargin,
         admin,
         total,
-        tenor > 0 ? total / tenor : total,
+        number_(value(row, ['Angsuran Per Bulan', 'Angsuran_Per_Bulan'])) ||
+          (tenor > 0 ? total / tenor : total),
         remaining,
         value(row, ['Status']) || (remaining <= 0 ? 'Lunas' : 'Aktif'),
         value(row, ['Keterangan']) || 'Migrasi data lama'
@@ -2385,7 +2434,11 @@ function formatSheets_() {
 
   setFormats_('Anggota', ['B:B', 'G:G', 'I:I'], ['yyyy-mm-dd', '#,##0', 'yyyy-mm-dd']);
   setFormats_('Simpanan', ['B:B', 'G:G'], ['yyyy-mm-dd', '#,##0']);
-  setFormats_('Pinjaman', ['B:B', 'E:E', 'G:K'], ['yyyy-mm-dd', '#,##0', '#,##0.00']);
+  setFormats_(
+    'Pinjaman',
+    ['B:B', 'E:E', 'G:H', 'I:L'],
+    ['dd/MM/yyyy', '#,##0', '0.00"%"', '#,##0.00']
+  );
   setFormats_('Angsuran', ['B:B', 'G:H'], ['yyyy-mm-dd', '#,##0']);
   setFormats_('Kas', ['B:B', 'E:F'], ['yyyy-mm-dd', '#,##0']);
 }
@@ -2698,8 +2751,9 @@ function applyExitCreditToLoans_(memberId, credit, date) {
       item.data['Nama Anggota'], installmentNo, applied, after,
       'Kompensasi simpanan saat anggota keluar', DEFAULT_OFFICER
     ]);
-    sheet.getRange(item.row, 11).setValue(after);
-    sheet.getRange(item.row, 12).setValue(after <= 0 ? 'Lunas' : item.data['Status']);
+    sheet.getRange(item.row, LOAN_COLUMN.REMAINING).setValue(after);
+    sheet.getRange(item.row, LOAN_COLUMN.STATUS)
+      .setValue(after <= 0 ? 'Lunas' : item.data['Status']);
     remainingCredit -= applied;
   });
 }
@@ -2931,33 +2985,55 @@ function getLoans(filters) {
 
 function addLoan(data) {
   return withLock_(function() {
-    validateRequired_(data, ['date', 'memberId', 'principal', 'tenor', 'margin', 'adminFee']);
-    var member = getMemberById_(data.memberId);
-    if (!member) throw new Error('Anggota tidak ditemukan.');
-    if (member['Status'] !== 'Aktif') throw new Error('Pinjaman hanya dapat dibuat untuk anggota aktif.');
+    validateRequired_(data, ['date', 'principal', 'tenor', 'adminFee']);
+    var percentageInput = data.percentage;
+    if (percentageInput === undefined || percentageInput === null || percentageInput === '') {
+      percentageInput = data.margin;
+    }
+    if (percentageInput === undefined || percentageInput === null || percentageInput === '') {
+      throw new Error('Persentase wajib diisi.');
+    }
+
+    var borrowerType = data.borrowerType === 'nonmember' ? 'nonmember' : 'member';
+    var memberId = '';
+    var borrowerName = '';
+    if (borrowerType === 'member') {
+      if (!data.memberId) throw new Error('Pilih anggota aktif.');
+      var member = getMemberById_(data.memberId);
+      if (!member) throw new Error('Anggota tidak ditemukan.');
+      if (member['Status'] !== 'Aktif') {
+        throw new Error('Pinjaman hanya dapat dibuat untuk anggota aktif.');
+      }
+      memberId = String(data.memberId);
+      borrowerName = cleanText_(member['Nama Lengkap'], 150);
+    } else {
+      borrowerName = cleanText_(data.borrowerName, 150);
+      if (!borrowerName) throw new Error('Nama peminjam nonanggota wajib diisi.');
+    }
 
     var principal = positive_(data.principal, 'Pokok pinjaman');
     var tenor = Math.floor(positive_(data.tenor, 'Tenor'));
-    var marginPercent = positiveOrZero_(data.margin, 'Margin');
+    var percentage = positiveOrZero_(percentageInput, 'Persentase');
     var adminFee = positiveOrZero_(data.adminFee, 'Biaya admin');
     if (tenor > 360) throw new Error('Tenor maksimal 360 bulan.');
-    if (marginPercent > 1000) throw new Error('Persentase margin terlalu besar.');
+    if (percentage > 1000) throw new Error('Persentase terlalu besar.');
 
-    var marginNominal = principal * marginPercent / 100;
+    var appliedMargin = calculateAppliedMargin_(percentage, tenor);
+    var marginNominal = principal * appliedMargin / 100;
     var totalBill = principal + marginNominal + adminFee;
     var installment = totalBill / tenor;
     var loanId = nextId_('Pinjaman', 'PJM-', 4);
     var date = parseRequiredDate_(data.date, 'Tanggal pengajuan');
 
     getDb_().getSheetByName('Pinjaman').appendRow([
-      loanId, date, data.memberId, member['Nama Lengkap'], principal, tenor,
-      marginPercent, adminFee, totalBill, installment, totalBill, 'Aktif',
-      cleanText_(data.notes, 500)
+      loanId, date, memberId, borrowerName, principal, tenor,
+      percentage, appliedMargin, adminFee, totalBill, installment, totalBill,
+      'Aktif', cleanText_(data.notes, 500)
     ]);
     appendCash_({
       date: date,
       category: 'Pencairan Pinjaman',
-      description: 'Pencairan pembiayaan - ' + member['Nama Lengkap'],
+      description: 'Pencairan pembiayaan - ' + borrowerName,
       incoming: 0,
       outgoing: principal,
       source: 'Pinjaman',
@@ -2967,7 +3043,7 @@ function addLoan(data) {
       appendCash_({
         date: date,
         category: 'Biaya Admin',
-        description: 'Biaya admin pembiayaan - ' + member['Nama Lengkap'],
+        description: 'Biaya admin pembiayaan - ' + borrowerName,
         incoming: adminFee,
         outgoing: 0,
         source: 'Pinjaman',
@@ -2980,6 +3056,8 @@ function addLoan(data) {
       message: 'Pembiayaan berhasil dibuat.',
       id: loanId,
       calculation: {
+        percentage: percentage,
+        appliedMargin: appliedMargin,
         marginNominal: marginNominal,
         totalBill: totalBill,
         installment: installment
@@ -2993,9 +3071,11 @@ function payInstallment(data) {
     validateRequired_(data, ['loanId', 'date', 'amount']);
     var found = findRowById_('Pinjaman', data.loanId);
     if (!found) throw new Error('Data pinjaman tidak ditemukan.');
-    if (found.values[11] !== 'Aktif') throw new Error('Pinjaman ini tidak berstatus Aktif.');
+    if (found.values[LOAN_COLUMN.STATUS - 1] !== 'Aktif') {
+      throw new Error('Pinjaman ini tidak berstatus Aktif.');
+    }
     var amount = positive_(data.amount, 'Jumlah bayar');
-    var remainingBefore = number_(found.values[10]);
+    var remainingBefore = number_(found.values[LOAN_COLUMN.REMAINING - 1]);
     if (amount > remainingBefore + 0.01) throw new Error('Jumlah bayar melebihi sisa pinjaman.');
 
     var date = parseRequiredDate_(data.date, 'Tanggal bayar');
@@ -3009,8 +3089,9 @@ function payInstallment(data) {
       installmentNo, amount, remainingAfter, cleanText_(data.notes, 500), officer
     ]);
     var loanSheet = getDb_().getSheetByName('Pinjaman');
-    loanSheet.getRange(found.row, 11).setValue(remainingAfter);
-    loanSheet.getRange(found.row, 12).setValue(remainingAfter <= 0.01 ? 'Lunas' : 'Aktif');
+    loanSheet.getRange(found.row, LOAN_COLUMN.REMAINING).setValue(remainingAfter);
+    loanSheet.getRange(found.row, LOAN_COLUMN.STATUS)
+      .setValue(remainingAfter <= 0.01 ? 'Lunas' : 'Aktif');
 
     appendInstallmentCash_(found.values, {
       installmentId: installmentId,
@@ -3042,8 +3123,8 @@ function updateInstallment(data) {
     var oldAmount = number_(installment.values[6]);
     var newAmount = positive_(data.amount, 'Jumlah bayar');
     var delta = oldAmount - newAmount;
-    var totalBill = number_(loan.values[8]);
-    var newRemaining = number_(loan.values[10]) + delta;
+    var totalBill = number_(loan.values[LOAN_COLUMN.TOTAL_BILL - 1]);
+    var newRemaining = number_(loan.values[LOAN_COLUMN.REMAINING - 1]) + delta;
     if (newRemaining < -0.01) throw new Error('Jumlah bayar melebihi sisa pinjaman.');
     newRemaining = Math.min(totalBill, Math.max(0, newRemaining));
 
@@ -3099,10 +3180,10 @@ function deleteInstallment(installmentId) {
     if (!loan) throw new Error('Data pinjaman terkait tidak ditemukan.');
     var amount = number_(installment.values[6]);
     var installmentNo = number_(installment.values[5]);
-    var totalBill = number_(loan.values[8]);
+    var totalBill = number_(loan.values[LOAN_COLUMN.TOTAL_BILL - 1]);
     var newRemaining = Math.min(
       totalBill,
-      Math.max(0, number_(loan.values[10]) + amount)
+      Math.max(0, number_(loan.values[LOAN_COLUMN.REMAINING - 1]) + amount)
     );
 
     getDb_().getSheetByName('Angsuran').deleteRow(installment.row);
@@ -3120,13 +3201,14 @@ function deleteInstallment(installmentId) {
 }
 
 function appendInstallmentCash_(loanValues, installment) {
-  var totalBill = number_(loanValues[8]);
-  var principal = number_(loanValues[4]);
-  var marginNominal = principal * number_(loanValues[6]) / 100;
+  var totalBill = number_(loanValues[LOAN_COLUMN.TOTAL_BILL - 1]);
+  var principal = number_(loanValues[LOAN_COLUMN.PRINCIPAL - 1]);
+  var marginNominal = principal *
+    number_(loanValues[LOAN_COLUMN.APPLIED_MARGIN - 1]) / 100;
   var marginRatio = totalBill > 0 ? marginNominal / totalBill : 0;
   var marginPart = Math.min(installment.amount * marginRatio, marginNominal);
   var principalPart = Math.max(0, installment.amount - marginPart);
-  var memberName = String(loanValues[3]);
+  var memberName = String(loanValues[LOAN_COLUMN.BORROWER_NAME - 1]);
 
   if (principalPart > 0) {
     appendCash_({
@@ -3170,12 +3252,12 @@ function adjustLaterInstallmentBalances_(loanId, installmentNo, delta, renumber)
 function setLoanRemaining_(loan, remaining) {
   var status = remaining <= 0.01
     ? 'Lunas'
-    : (String(loan.values[11]) === 'Macet' ? 'Macet' : 'Aktif');
+    : (String(loan.values[LOAN_COLUMN.STATUS - 1]) === 'Macet' ? 'Macet' : 'Aktif');
   var sheet = getDb_().getSheetByName('Pinjaman');
-  sheet.getRange(loan.row, 11).setValue(remaining);
-  sheet.getRange(loan.row, 12).setValue(status);
-  loan.values[10] = remaining;
-  loan.values[11] = status;
+  sheet.getRange(loan.row, LOAN_COLUMN.REMAINING).setValue(remaining);
+  sheet.getRange(loan.row, LOAN_COLUMN.STATUS).setValue(status);
+  loan.values[LOAN_COLUMN.REMAINING - 1] = remaining;
+  loan.values[LOAN_COLUMN.STATUS - 1] = status;
 }
 
 function getInstallmentHistory(loanId) {
@@ -3202,7 +3284,7 @@ function generateInstallmentReceiptPdf(installmentId) {
     id: installment['ID Angsuran'],
     date: formatDisplayDate_(installment['Tanggal Bayar']),
     rows: [
-      ['Nama Anggota', installment['Nama Anggota']],
+      ['Nama Peminjam', installment['Nama Anggota']],
       ['Keterangan', installment['Keterangan'] || ('Angsuran ke ' + installment['Angsuran Ke'])],
       ['Jumlah Bayar', formatRupiah_(installment['Jumlah Bayar'])],
       ['Sisa Pinjaman', formatRupiah_(installment['Sisa Pinjaman Setelah Bayar'])],
@@ -3398,7 +3480,8 @@ function rebuildCashLedger_() {
     if (/kompensasi/i.test(String(row['Keterangan'] || ''))) return;
     var loan = loanMap[row['ID Pinjaman']] || {};
     var totalBill = number_(loan.totalBill);
-    var marginNominal = number_(loan.principal) * number_(loan.margin) / 100;
+    var marginNominal = number_(loan.principal) *
+      number_(loan.appliedMargin) / 100;
     var marginPart = totalBill > 0 ? number_(row['Jumlah Bayar']) * marginNominal / totalBill : 0;
     add({
       date: row['Tanggal Bayar'],
@@ -3668,7 +3751,13 @@ function getLoanMap_() {
       memberId: at(row, ['ID Anggota', 'ID_Anggota']),
       memberName: at(row, ['Nama Anggota', 'Nama_Peminjam']),
       principal: number_(at(row, ['Pokok Pinjaman', 'Plafon'])),
-      margin: number_(at(row, ['Margin/Bunga', 'Bunga_Persen'])),
+      percentage: number_(at(row, [
+        'Persentase', 'Persentase Tahunan'
+      ])),
+      appliedMargin: number_(at(row, [
+        'Persentase Margin Dikenakan', 'Margin Dikenakan',
+        'Margin/Bunga', 'Bunga_Persen'
+      ])),
       totalBill: number_(at(row, ['Total Tagihan', 'Total_Tagihan']))
     };
   });
@@ -3836,6 +3925,32 @@ function number_(value) {
   }
   var parsed = Number(normalized);
   return isFinite(parsed) ? parsed : 0;
+}
+
+function normalizePercentage_(value) {
+  var percentage = number_(value);
+  if (percentage > 0 && percentage <= 1) percentage *= 100;
+  return roundPercentage_(percentage);
+}
+
+function calculateAppliedMargin_(percentage, tenor) {
+  return roundPercentage_(
+    positiveOrZero_(percentage, 'Persentase') *
+    positiveOrZero_(tenor, 'Tenor') / 12
+  );
+}
+
+function annualPercentageFromApplied_(appliedMargin, tenor) {
+  var months = number_(tenor);
+  if (months <= 0) return roundPercentage_(appliedMargin);
+  var percentage = number_(appliedMargin) * 12 / months;
+  var nearestInteger = Math.round(percentage);
+  if (Math.abs(percentage - nearestInteger) <= 0.1) percentage = nearestInteger;
+  return roundPercentage_(percentage);
+}
+
+function roundPercentage_(value) {
+  return Math.round(number_(value) * 1000000) / 1000000;
 }
 
 function positive_(value, label) {
