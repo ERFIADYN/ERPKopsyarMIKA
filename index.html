@@ -24,7 +24,7 @@
       --canvas: #f5f7fb;
       --shadow: 0 8px 24px rgba(20, 42, 78, .07);
       --radius: 14px;
-      --sidebar: 244px;
+      --sidebar: 260px;
     }
 
     * { box-sizing: border-box; }
@@ -47,20 +47,19 @@
       z-index: 30;
       width: var(--sidebar);
       color: #fff;
-      background:
-        radial-gradient(circle at 20% 0, rgba(57, 135, 244, .35), transparent 32%),
-        linear-gradient(180deg, #0c3977 0%, #082856 100%);
-      padding: 22px 15px;
+      background: linear-gradient(180deg, #0b2029 0%, #071a22 100%);
+      padding: 18px 10px;
       display: flex;
       flex-direction: column;
-      box-shadow: 8px 0 30px rgba(6, 28, 61, .12);
+      overflow-y: auto;
+      box-shadow: 8px 0 30px rgba(6, 28, 38, .18);
       transition: transform .25s ease;
     }
     .brand {
       display: flex;
       align-items: center;
       gap: 11px;
-      padding: 2px 5px 22px;
+      padding: 2px 5px 17px;
       border-bottom: 1px solid rgba(255, 255, 255, .12);
     }
     .brand-logo, .logo-placeholder {
@@ -79,43 +78,103 @@
       padding: 4px;
     }
     .brand-copy strong { display: block; font-size: 13px; line-height: 1.35; }
-    .brand-copy span { display: block; margin-top: 3px; color: #b9d1ef; font-size: 10px; }
+    .brand-copy span { display: block; margin-top: 3px; color: #9bb0b8; font-size: 10px; }
     .nav-label {
-      margin: 21px 10px 8px;
-      color: #8eb2df;
-      font-size: 9px;
-      font-weight: 700;
+      margin: 18px 7px 7px;
+      color: #71858c;
+      font-size: 10px;
+      font-weight: 800;
       letter-spacing: 1.2px;
       text-transform: uppercase;
     }
-    .nav-menu { display: grid; gap: 5px; }
+    .nav-menu { display: grid; gap: 3px; }
     .nav-item {
       width: 100%;
       border: 0;
-      border-radius: 10px;
-      padding: 10px 11px;
+      border-radius: 6px;
+      padding: 9px 9px;
       display: flex;
       align-items: center;
       gap: 11px;
-      color: #dceafd;
+      color: #aebbc0;
       background: transparent;
       text-align: left;
       font-weight: 600;
       transition: .18s ease;
     }
-    .nav-item:hover { background: rgba(255, 255, 255, .08); color: #fff; }
+    .nav-item:hover { background: rgba(20, 147, 145, .12); color: #fff; }
     .nav-item.active {
       color: #fff;
-      background: linear-gradient(90deg, #176bd7, #2279e7);
-      box-shadow: 0 7px 18px rgba(0, 28, 72, .2);
+      background: linear-gradient(90deg, rgba(22, 139, 137, .42), rgba(19, 97, 104, .18));
+      border-left: 3px solid #40c6b5;
+      box-shadow: inset 0 0 0 1px rgba(64, 198, 181, .08);
     }
     .nav-icon { width: 18px; height: 18px; flex: 0 0 18px; }
     .sidebar-foot {
-      margin-top: auto;
+      margin-top: 18px;
       padding: 15px 8px 2px;
       color: #97b6db;
       font-size: 10px;
       line-height: 1.5;
+    }
+    .erp-toolbar { display: flex; gap: 8px; align-items: end; flex-wrap: wrap; }
+    .erp-toolbar .field { min-width: 150px; }
+    .accounting-kpis {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .accounting-kpi { padding: 16px; }
+    .accounting-kpi span { color: var(--muted); font-size: 10px; font-weight: 700; }
+    .accounting-kpi strong { display: block; margin-top: 8px; font-size: 19px; }
+    .statement-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .statement-stack { display: grid; gap: 16px; align-content: start; }
+    .statement-panel { padding: 18px; }
+    .statement-panel > h2 {
+      margin: 0 0 14px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #dfe7ef;
+      font-size: 14px;
+    }
+    .statement-group { margin-bottom: 15px; }
+    .statement-group h3 {
+      margin: 0;
+      padding: 8px 10px;
+      color: #0b5460;
+      background: #edf8f7;
+      border-radius: 7px;
+      font-size: 11px;
+    }
+    .statement-line, .statement-total {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 7px 10px;
+      border-bottom: 1px solid #eef1f5;
+      font-size: 11px;
+    }
+    .statement-total { font-weight: 800; border-top: 2px solid #dfe7ef; }
+    .balance-ok { color: #08744d; }
+    .balance-error { color: #b52f3a; }
+    .journal-lines { display: grid; gap: 9px; }
+    .journal-line {
+      display: grid;
+      grid-template-columns: minmax(220px, 2fr) 1fr 1fr auto;
+      align-items: end;
+      gap: 8px;
+      padding: 10px;
+      background: #f8fafc;
+      border-radius: 9px;
+    }
+    .journal-group-start td { border-top: 2px solid #d8e2ee; }
+    .journal-account { display: flex; align-items: center; gap: 8px; }
+    .journal-account.credit { padding-left: 22px; }
+    .journal-account code {
+      min-width: 42px;
+      color: var(--blue);
+      font-size: 10px;
+      font-weight: 800;
     }
 
     .main { min-height: 100vh; margin-left: var(--sidebar); }
@@ -526,6 +585,7 @@
       .filter-grid, .filter-grid.compact { grid-template-columns: repeat(2, 1fr); }
       .charts-grid { grid-template-columns: 1fr; }
       .settings-layout { grid-template-columns: 1fr; }
+      .accounting-kpis { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 760px) {
       .sidebar { transform: translateX(-102%); }
@@ -541,6 +601,8 @@
       .filter-grid, .filter-grid.compact, .form-grid { grid-template-columns: 1fr; }
       .form-grid .full { grid-column: auto; }
       .summary-grid { grid-template-columns: repeat(2, 1fr); }
+      .statement-layout, .accounting-kpis { grid-template-columns: 1fr; }
+      .journal-line { grid-template-columns: 1fr; }
       .chart-card { min-height: 320px; }
       .chart-wrap { height: 245px; }
       .modal-backdrop { padding: 8px; align-items: flex-end; }
@@ -571,7 +633,7 @@
           <span>Amanah, Transparan, Sejahtera</span>
         </div>
       </div>
-      <div class="nav-label">Menu Utama</div>
+      <div class="nav-label">Operasional</div>
       <nav class="nav-menu">
         <button class="nav-item active" data-page="dashboard">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -589,10 +651,59 @@
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M5 6v13h14V6M8 10h8M8 14h5"/><path d="M9 3h6v3H9z"/></svg>
           Pinjaman
         </button>
-        <button class="nav-item" data-page="report">
-          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>
-          Laporan Keuangan
+      </nav>
+      <div class="nav-label">Akuntansi</div>
+      <nav class="nav-menu">
+        <button class="nav-item" data-page="coa">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16M4 12h16M4 19h16M7 3v4M12 10v4M17 17v4"/></svg>
+          Chart of Accounts
         </button>
+        <button class="nav-item" data-page="journal">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/><path d="M3 7h4M3 12h4M3 17h4"/></svg>
+          Jurnal Umum
+        </button>
+        <button class="nav-item" data-page="cashbank">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10h18M5 10v8M9 10v8M15 10v8M19 10v8M2 20h20M12 3l9 5H3z"/></svg>
+          Rincian Kas &amp; Bank
+        </button>
+        <button class="nav-item" data-page="trial">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M4 7h16M6 7l-3 7h6L6 7zm12 0-3 7h6l-3-7z"/></svg>
+          Trial Balance
+        </button>
+      </nav>
+      <div class="nav-label">Laporan</div>
+      <nav class="nav-menu">
+        <button class="nav-item" data-page="balance">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20h16M6 17V9M10 17V5M14 17v-7M18 17V7"/></svg>
+          Neraca
+        </button>
+        <button class="nav-item" data-page="income">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 18l5-5 4 3 7-9M16 7h4v4"/></svg>
+          Laba Rugi
+        </button>
+        <button class="nav-item" data-page="loanreport">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 3h14v18H5zM8 7h8M8 11h8M8 15h5"/></svg>
+          Rincian Pinjaman
+        </button>
+        <button class="nav-item" data-page="shu">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg>
+          Laporan SHU
+        </button>
+        <button class="nav-item" data-page="assets">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="3" width="14" height="18" rx="1"/><path d="M8 7h8M8 11h8M8 15h5"/></svg>
+          Aset Tetap
+        </button>
+        <button class="nav-item" data-page="benevolent">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+          Dana Kebajikan
+        </button>
+        <button class="nav-item" data-page="administration">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h7l2 2h9v11H3z"/></svg>
+          Administrasi
+        </button>
+      </nav>
+      <div class="nav-label">Sistem</div>
+      <nav class="nav-menu">
         <button class="nav-item" data-page="settings">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21h-4v-.1A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3v-4h.1A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.1A1.7 1.7 0 0 0 15.4 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.4.25.73.6 1 .99.25.4.39.85.4 1.31v.1h.1v4h-.1a1.7 1.7 0 0 0-1.4.6z"/></svg>
           Pengaturan
@@ -758,6 +869,243 @@
           </div>
         </section>
 
+        <section class="page" id="page-coa">
+          <div class="page-heading">
+            <div><h1>Chart of Accounts</h1><p>Daftar akun standar untuk seluruh pencatatan koperasi.</p></div>
+            <div class="heading-actions no-print"><button class="btn btn-outline erp-export-excel">Excel</button><button class="btn btn-outline erp-export-pdf">PDF</button><button class="btn btn-primary" id="addCoaBtn">Tambah Akun</button></div>
+          </div>
+          <div class="card filter-card no-print">
+            <div class="filter-grid compact">
+              <div class="field"><label>Pencarian</label><input id="coaQuery" placeholder="Kode atau nama akun"></div>
+              <div class="field"><label>Tipe Akun</label><select id="coaType"><option>Semua</option><option>Aset</option><option>Liabilitas</option><option>Ekuitas</option><option>Pendapatan</option><option>Beban</option></select></div>
+              <div></div><div></div>
+              <button class="btn btn-outline" id="filterCoaBtn">Terapkan</button>
+            </div>
+          </div>
+          <div class="card table-card">
+            <div class="table-head"><h2>Daftar Akun</h2><span id="coaCount">0 akun</span></div>
+            <div class="table-scroll"><table>
+              <thead><tr><th>Kode</th><th>Nama Akun</th><th>Tipe</th><th>Kelompok Laporan</th><th>Saldo Normal</th><th>Saldo Awal D</th><th>Saldo Awal K</th><th>Status</th><th>Aksi</th></tr></thead>
+              <tbody id="coaTable"></tbody>
+            </table></div>
+          </div>
+        </section>
+
+        <section class="page" id="page-journal">
+          <div class="page-heading">
+            <div><h1>Jurnal Umum</h1><p>Pencatatan double-entry dari transaksi otomatis dan jurnal manual.</p></div>
+            <div class="heading-actions no-print">
+              <button class="btn btn-outline erp-export-excel">Excel</button>
+              <button class="btn btn-outline erp-export-pdf">PDF</button>
+              <button class="btn btn-outline" id="syncJournalBtn">Sinkronkan</button>
+              <button class="btn btn-primary" id="addJournalBtn">Jurnal Manual</button>
+            </div>
+          </div>
+          <div class="card filter-card no-print">
+            <div class="filter-grid">
+              <div class="field"><label>Pencarian</label><input id="journalQuery" placeholder="ID, akun, atau keterangan"></div>
+              <div class="field"><label>Sumber</label><select id="journalSource"><option>Semua</option><option>Manual</option><option>Saldo Awal</option><option>Simpanan</option><option>Pinjaman</option><option>Angsuran</option><option>Kas Manual</option><option>Aset Tetap</option><option>Penyusutan</option><option>Dana Kebajikan</option></select></div>
+              <div class="field"><label>Tanggal Mulai</label><input id="journalStart" type="date"></div>
+              <div class="field"><label>Tanggal Selesai</label><input id="journalEnd" type="date"></div>
+              <button class="btn btn-outline" id="filterJournalBtn">Tampilkan</button>
+            </div>
+          </div>
+          <div class="accounting-kpis">
+            <div class="card accounting-kpi"><span>TOTAL UANG MASUK</span><strong id="journalCashIn">Rp 0</strong></div>
+            <div class="card accounting-kpi"><span>TOTAL UANG KELUAR</span><strong id="journalCashOut">Rp 0</strong></div>
+            <div class="card accounting-kpi"><span>ARUS KAS BERSIH</span><strong id="journalNetCashFlow">Rp 0</strong></div>
+            <div class="card accounting-kpi"><span>JUMLAH JURNAL</span><strong id="journalCount">0</strong></div>
+          </div>
+          <div class="card table-card">
+            <div class="table-scroll"><table>
+              <thead><tr><th>Tanggal</th><th>Ref</th><th>Jurnal</th><th>Debet</th><th>Kredit</th><th>Sumber</th><th>Aksi</th></tr></thead>
+              <tbody id="journalTable"></tbody>
+            </table></div>
+          </div>
+        </section>
+
+        <section class="page" id="page-cashbank">
+          <div class="page-heading">
+            <div><h1>Rincian Kas &amp; Bank</h1><p>Buku kas satu sisi sebagai sumber jurnal otomatis.</p></div>
+            <div class="heading-actions no-print"><button class="btn btn-outline erp-export-excel">Excel</button><button class="btn btn-outline erp-export-pdf">PDF</button></div>
+          </div>
+          <div class="card filter-card no-print"><div class="erp-toolbar">
+            <div class="field"><label>Tanggal Mulai</label><input id="cashBankStart" type="date"></div>
+            <div class="field"><label>Tanggal Selesai</label><input id="cashBankEnd" type="date"></div>
+            <button class="btn btn-primary" id="showCashBankBtn">Tampilkan</button>
+            <button class="btn btn-outline" id="syncCashBankBtn">Sinkronkan</button>
+          </div></div>
+          <div class="accounting-kpis">
+            <div class="card accounting-kpi"><span>SALDO AWAL</span><strong id="cashBankOpening">Rp 0</strong></div>
+            <div class="card accounting-kpi"><span>UANG MASUK</span><strong id="cashBankIn">Rp 0</strong></div>
+            <div class="card accounting-kpi"><span>UANG KELUAR</span><strong id="cashBankOut">Rp 0</strong></div>
+            <div class="card accounting-kpi"><span>SALDO AKHIR</span><strong id="cashBankClosing">Rp 0</strong></div>
+          </div>
+          <div class="card table-card"><div class="table-scroll"><table>
+            <thead><tr><th>Tanggal</th><th>Ref</th><th>COA</th><th>Akun</th><th>Transaksi</th><th>Masuk</th><th>Keluar</th><th>Saldo</th><th>Pembayaran Via</th></tr></thead>
+            <tbody id="cashBankTable"></tbody>
+          </table></div></div>
+        </section>
+
+        <section class="page" id="page-trial">
+          <div class="page-heading">
+            <div><h1>Trial Balance</h1><p>Neraca saldo awal, mutasi, dan saldo akhir seluruh akun.</p></div>
+            <div class="heading-actions no-print"><button class="btn btn-outline erp-export-excel">Excel</button><button class="btn btn-outline erp-export-pdf">PDF</button></div>
+          </div>
+          <div class="card filter-card no-print"><div class="erp-toolbar">
+            <div class="field"><label>Tanggal Mulai</label><input id="trialStart" type="date"></div>
+            <div class="field"><label>Tanggal Selesai</label><input id="trialEnd" type="date"></div>
+            <button class="btn btn-primary" id="showTrialBtn">Tampilkan</button>
+            <span id="trialStatus" class="badge badge-green">Seimbang</span>
+          </div></div>
+          <div class="card table-card"><div class="table-scroll"><table>
+            <thead><tr><th>Kode</th><th>Nama Akun</th><th>Awal Debet</th><th>Awal Kredit</th><th>Mutasi Debet</th><th>Mutasi Kredit</th><th>Akhir Debet</th><th>Akhir Kredit</th></tr></thead>
+            <tbody id="trialTable"></tbody><tfoot id="trialFoot"></tfoot>
+          </table></div></div>
+        </section>
+
+        <section class="page" id="page-balance">
+          <div class="page-heading">
+            <div><h1>Neraca</h1><p>Laporan posisi keuangan koperasi pada tanggal tertentu.</p></div>
+            <div class="heading-actions no-print"><button class="btn btn-outline erp-export-excel">Excel</button><button class="btn btn-outline erp-export-pdf">PDF</button></div>
+          </div>
+          <div class="card filter-card no-print"><div class="erp-toolbar">
+            <div class="field"><label>Posisi Per Tanggal</label><input id="balanceDate" type="date"></div>
+            <button class="btn btn-primary" id="showBalanceBtn">Tampilkan</button>
+            <span id="balanceStatus" class="badge badge-green">Seimbang</span>
+          </div></div>
+          <div class="statement-layout" id="balanceStatement"></div>
+        </section>
+
+        <section class="page" id="page-income">
+          <div class="page-heading">
+            <div><h1>Laba Rugi</h1><p>Pendapatan, beban, dan Sisa Hasil Usaha periode berjalan.</p></div>
+            <div class="heading-actions no-print"><button class="btn btn-outline erp-export-excel">Excel</button><button class="btn btn-outline erp-export-pdf">PDF</button></div>
+          </div>
+          <div class="card filter-card no-print"><div class="erp-toolbar">
+            <div class="field"><label>Tanggal Mulai</label><input id="incomeStart" type="date"></div>
+            <div class="field"><label>Tanggal Selesai</label><input id="incomeEnd" type="date"></div>
+            <button class="btn btn-primary" id="showIncomeBtn">Tampilkan</button>
+          </div></div>
+          <div class="accounting-kpis">
+            <div class="card accounting-kpi"><span>TOTAL PENDAPATAN</span><strong id="incomeRevenue">Rp 0</strong></div>
+            <div class="card accounting-kpi"><span>TOTAL BEBAN</span><strong id="incomeExpense">Rp 0</strong></div>
+            <div class="card accounting-kpi"><span>SHU / LABA BERSIH</span><strong id="incomeNet">Rp 0</strong></div>
+            <div class="card accounting-kpi"><span>PERIODE</span><strong id="incomePeriod">-</strong></div>
+          </div>
+          <div class="statement-layout" id="incomeStatement"></div>
+        </section>
+
+        <section class="page" id="page-loanreport">
+          <div class="page-heading">
+            <div><h1>Rincian Pinjaman</h1><p>Rekap pokok, margin, pembayaran, dan saldo pembiayaan.</p></div>
+            <div class="heading-actions no-print"><button class="btn btn-outline erp-export-excel">Excel</button><button class="btn btn-outline erp-export-pdf">PDF</button></div>
+          </div>
+          <div class="card filter-card no-print"><div class="erp-toolbar">
+            <div class="field"><label>Status</label><select id="loanReportStatus"><option>Semua</option><option>Aktif</option><option>Lunas</option><option>Macet</option></select></div>
+            <div class="field"><label>Tanggal Mulai</label><input id="loanReportStart" type="date"></div>
+            <div class="field"><label>Tanggal Selesai</label><input id="loanReportEnd" type="date"></div>
+            <button class="btn btn-primary" id="showLoanReportBtn">Tampilkan</button>
+          </div></div>
+          <div class="accounting-kpis">
+            <div class="card accounting-kpi"><span>POKOK PEMBIAYAAN</span><strong id="loanReportPrincipal">Rp 0</strong></div>
+            <div class="card accounting-kpi"><span>MARGIN</span><strong id="loanReportMargin">Rp 0</strong></div>
+            <div class="card accounting-kpi"><span>SUDAH DIBAYAR</span><strong id="loanReportPaid">Rp 0</strong></div>
+            <div class="card accounting-kpi"><span>SISA PIUTANG</span><strong id="loanReportRemaining">Rp 0</strong></div>
+          </div>
+          <div class="card table-card"><div class="table-scroll"><table>
+            <thead><tr><th>ID</th><th>Tanggal</th><th>Peminjam</th><th>Pokok</th><th>Persentase</th><th>Margin</th><th>Total</th><th>Dibayar</th><th>Sisa</th><th>Status</th></tr></thead>
+            <tbody id="loanReportTable"></tbody>
+          </table></div></div>
+        </section>
+
+        <section class="page" id="page-shu">
+          <div class="page-heading">
+            <div><h1>Laporan Pembagian SHU</h1><p>Alokasi Sisa Hasil Usaha sesuai persentase pada pengaturan.</p></div>
+            <div class="heading-actions no-print"><button class="btn btn-outline erp-export-excel">Excel</button><button class="btn btn-outline erp-export-pdf">PDF</button></div>
+          </div>
+          <div class="card filter-card no-print"><div class="erp-toolbar">
+            <div class="field"><label>Tanggal Mulai</label><input id="shuStart" type="date"></div>
+            <div class="field"><label>Tanggal Selesai</label><input id="shuEnd" type="date"></div>
+            <button class="btn btn-primary" id="showShuBtn">Tampilkan</button>
+            <span id="shuStatus" class="badge badge-green">100%</span>
+          </div></div>
+          <div class="accounting-kpis">
+            <div class="card accounting-kpi"><span>SHU TAHUN BERJALAN</span><strong id="shuNet">Rp 0</strong></div>
+            <div class="card accounting-kpi"><span>TOTAL DIALOKASIKAN</span><strong id="shuAllocated">Rp 0</strong></div>
+            <div class="card accounting-kpi"><span>SISA</span><strong id="shuRemaining">Rp 0</strong></div>
+            <div class="card accounting-kpi"><span>TOTAL PERSENTASE</span><strong id="shuPercentage">0%</strong></div>
+          </div>
+          <div class="card table-card"><div class="table-scroll"><table>
+            <thead><tr><th>Komponen Pembagian</th><th>Persentase</th><th>Jumlah</th></tr></thead>
+            <tbody id="shuTable"></tbody>
+          </table></div></div>
+        </section>
+
+        <section class="page" id="page-assets">
+          <div class="page-heading">
+            <div><h1>Aset Tetap</h1><p>Register aset, umur ekonomis, penyusutan, dan nilai buku.</p></div>
+            <div class="heading-actions no-print"><button class="btn btn-outline erp-export-excel">Excel</button><button class="btn btn-outline erp-export-pdf">PDF</button><button class="btn btn-primary" id="addAssetBtn">Tambah Aset</button></div>
+          </div>
+          <div class="card filter-card no-print"><div class="erp-toolbar">
+            <div class="field"><label>Posisi Per Tanggal</label><input id="assetDate" type="date"></div>
+            <div class="field"><label>Status</label><select id="assetStatus"><option>Semua</option><option>Aktif</option><option>Dijual</option><option>Dihapus</option></select></div>
+            <button class="btn btn-primary" id="showAssetsBtn">Tampilkan</button>
+          </div></div>
+          <div class="accounting-kpis">
+            <div class="card accounting-kpi"><span>HARGA PEROLEHAN</span><strong id="assetCost">Rp 0</strong></div>
+            <div class="card accounting-kpi"><span>AKUMULASI PENYUSUTAN</span><strong id="assetDepreciation">Rp 0</strong></div>
+            <div class="card accounting-kpi"><span>NILAI BUKU</span><strong id="assetBookValue">Rp 0</strong></div>
+            <div class="card accounting-kpi"><span>JUMLAH ASET</span><strong id="assetCount">0</strong></div>
+          </div>
+          <div class="card table-card"><div class="table-scroll"><table>
+            <thead><tr><th>ID</th><th>Tanggal</th><th>Nama Aset</th><th>Akun</th><th>Harga</th><th>Umur</th><th>Penyusutan/Bulan</th><th>Akumulasi</th><th>Nilai Buku</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody id="assetTable"></tbody>
+          </table></div></div>
+        </section>
+
+        <section class="page" id="page-benevolent">
+          <div class="page-heading">
+            <div><h1>Dana Kebajikan</h1><p>Penerimaan dan penyaluran dana sosial/kebajikan koperasi.</p></div>
+            <div class="heading-actions no-print"><button class="btn btn-outline erp-export-excel">Excel</button><button class="btn btn-outline erp-export-pdf">PDF</button><button class="btn btn-primary" id="addBenevolentBtn">Transaksi Baru</button></div>
+          </div>
+          <div class="card filter-card no-print"><div class="erp-toolbar">
+            <div class="field"><label>Tipe</label><select id="benevolentType"><option>Semua</option><option>Penerimaan</option><option>Penyaluran</option></select></div>
+            <div class="field"><label>Tanggal Mulai</label><input id="benevolentStart" type="date"></div>
+            <div class="field"><label>Tanggal Selesai</label><input id="benevolentEnd" type="date"></div>
+            <button class="btn btn-primary" id="showBenevolentBtn">Tampilkan</button>
+          </div></div>
+          <div class="accounting-kpis">
+            <div class="card accounting-kpi"><span>PENERIMAAN</span><strong id="benevolentIn">Rp 0</strong></div>
+            <div class="card accounting-kpi"><span>PENYALURAN</span><strong id="benevolentOut">Rp 0</strong></div>
+            <div class="card accounting-kpi"><span>SALDO DANA</span><strong id="benevolentBalance">Rp 0</strong></div>
+            <div class="card accounting-kpi"><span>TRANSAKSI</span><strong id="benevolentCount">0</strong></div>
+          </div>
+          <div class="card table-card"><div class="table-scroll"><table>
+            <thead><tr><th>Tanggal</th><th>ID</th><th>Tipe</th><th>Kategori</th><th>Deskripsi</th><th>Pihak</th><th>Jumlah</th><th>Metode</th><th>Aksi</th></tr></thead>
+            <tbody id="benevolentTable"></tbody>
+          </table></div></div>
+        </section>
+
+        <section class="page" id="page-administration">
+          <div class="page-heading">
+            <div><h1>Administrasi</h1><p>Register legalitas, RAT, pajak, akad, SOP, dan dokumen koperasi.</p></div>
+            <div class="heading-actions no-print"><button class="btn btn-primary" id="addDocumentBtn">Tambah Dokumen</button></div>
+          </div>
+          <div class="card filter-card no-print"><div class="filter-grid compact">
+            <div class="field"><label>Pencarian</label><input id="documentQuery" placeholder="Nomor atau nama dokumen"></div>
+            <div class="field"><label>Kategori</label><select id="documentCategory"><option>Semua</option><option>Legalitas</option><option>RAT</option><option>Perpajakan</option><option>Akad</option><option>SOP</option><option>Laporan</option><option>Lainnya</option></select></div>
+            <div></div><div></div><button class="btn btn-outline" id="filterDocumentsBtn">Terapkan</button>
+          </div></div>
+          <div class="card table-card">
+            <div class="table-head"><h2>Register Dokumen</h2><span id="documentCount">0 dokumen</span></div>
+            <div class="table-scroll"><table>
+              <thead><tr><th>Tanggal</th><th>Nomor</th><th>Kategori</th><th>Nama Dokumen</th><th>Status</th><th>Jatuh Tempo</th><th>Link</th><th>Aksi</th></tr></thead>
+              <tbody id="documentTable"></tbody>
+            </table></div>
+          </div>
+        </section>
+
         <section class="page" id="page-report">
           <div class="page-heading">
             <div>
@@ -837,8 +1185,24 @@
                   <div class="field"><label>Simpanan Wajib</label><input name="simpanan_wajib" type="number" min="0" required></div>
                   <div class="field"><label>Persentase Pembiayaan (%)</label><input name="margin_pinjaman" type="number" min="0" step="0.01" required></div>
                   <div class="field"><label>Biaya Admin</label><input name="biaya_admin" type="number" min="0" required></div>
+                  <div class="field"><label>Kode Akun Kas Utama</label><input name="akun_kas_default" maxlength="30" required></div>
+                  <div class="field"><label>Kode Akun Bank Utama</label><input name="akun_bank_default" maxlength="30" required></div>
                 </div>
               </div>
+            </div>
+            <div class="card settings-card" style="margin-top:16px">
+              <h2 class="section-title">Pembagian Sisa Hasil Usaha</h2>
+              <div class="form-grid">
+                <div class="field"><label>Cadangan Koperasi (%)</label><input name="shu_cadangan" type="number" min="0" step="0.01" required></div>
+                <div class="field"><label>Jasa Simpanan Anggota (%)</label><input name="shu_jasa_simpanan" type="number" min="0" step="0.01" required></div>
+                <div class="field"><label>Jasa Pinjaman Anggota (%)</label><input name="shu_jasa_pinjaman" type="number" min="0" step="0.01" required></div>
+                <div class="field"><label>Bagian Pengurus (%)</label><input name="shu_pengurus" type="number" min="0" step="0.01" required></div>
+                <div class="field"><label>Bonus Pengelola (%)</label><input name="shu_pengelola" type="number" min="0" step="0.01" required></div>
+                <div class="field"><label>Pendidikan & Partisipasi (%)</label><input name="shu_pendidikan" type="number" min="0" step="0.01" required></div>
+                <div class="field"><label>Pembangunan Koperasi (%)</label><input name="shu_pembangunan" type="number" min="0" step="0.01" required></div>
+                <div class="field"><label>Dana Sosial (%)</label><input name="shu_sosial" type="number" min="0" step="0.01" required></div>
+              </div>
+              <div class="field-hint" style="margin-top:10px">Jumlah seluruh persentase sebaiknya tepat 100%.</div>
             </div>
           </form>
         </section>
@@ -866,6 +1230,11 @@
       members: [],
       savings: [],
       loans: [],
+      coa: [],
+      journal: [],
+      assets: [],
+      benevolent: [],
+      documents: [],
       charts: {},
       installments: [],
       currentHistoryLoan: null,
@@ -879,6 +1248,17 @@
       members: ['Data Anggota', 'Kelola database induk anggota'],
       savings: ['Simpanan', 'Transaksi setoran dan penarikan'],
       loans: ['Pinjaman Syariah', 'Pembiayaan dan pembayaran angsuran'],
+      coa: ['Chart of Accounts', 'Struktur akun dan saldo awal koperasi'],
+      journal: ['Jurnal Umum', 'Pencatatan double-entry dan jurnal otomatis'],
+      cashbank: ['Rincian Kas & Bank', 'Mutasi seluruh kas dan rekening bank'],
+      trial: ['Trial Balance', 'Neraca saldo seluruh akun'],
+      balance: ['Neraca', 'Laporan posisi keuangan koperasi'],
+      income: ['Laba Rugi', 'Pendapatan, beban, dan Sisa Hasil Usaha'],
+      loanreport: ['Rincian Pinjaman', 'Rekap pembiayaan dan saldo piutang'],
+      shu: ['Laporan Pembagian SHU', 'Simulasi alokasi SHU koperasi'],
+      assets: ['Aset Tetap', 'Register dan penyusutan aset koperasi'],
+      benevolent: ['Dana Kebajikan', 'Penerimaan dan penyaluran dana sosial'],
+      administration: ['Administrasi', 'Register dokumen dan kepatuhan koperasi'],
       report: ['Laporan Keuangan', 'Pertanggungjawaban dan posisi keuangan'],
       settings: ['Pengaturan', 'Identitas serta aturan koperasi']
     };
@@ -979,6 +1359,15 @@
       $('#reportEnd').value = today();
       $('#dashboardStart').value = `${new Date().getFullYear()}-01-01`;
       $('#dashboardEnd').value = today();
+      [
+        'journalStart', 'cashBankStart', 'trialStart', 'incomeStart',
+        'loanReportStart', 'shuStart', 'benevolentStart'
+      ].forEach(id => { $(`#${id}`).value = firstDayOfYear(); });
+      [
+        'journalEnd', 'cashBankEnd', 'trialEnd', 'incomeEnd',
+        'loanReportEnd', 'shuEnd', 'benevolentEnd', 'balanceDate',
+        'assetDate'
+      ].forEach(id => { $(`#${id}`).value = today(); });
       try {
         setLoading(true, 'Menyiapkan database...');
         const data = await rpc('getAppData');
@@ -1010,6 +1399,17 @@
       if (page === 'members') loadMembers();
       if (page === 'savings') loadSavings();
       if (page === 'loans') loadLoans();
+      if (page === 'coa') loadCoa();
+      if (page === 'journal') loadJournal();
+      if (page === 'cashbank') loadCashBank();
+      if (page === 'trial') loadTrialBalance();
+      if (page === 'balance') loadBalanceSheet();
+      if (page === 'income') loadIncomeStatement();
+      if (page === 'loanreport') loadLoanReport();
+      if (page === 'shu') loadShu();
+      if (page === 'assets') loadAssets();
+      if (page === 'benevolent') loadBenevolent();
+      if (page === 'administration') loadDocuments();
       if (page === 'report') loadReport();
       if (page === 'settings') renderSettings();
     }
@@ -1600,6 +2000,655 @@
       }
     }
 
+    function periodFilter(startId, endId) {
+      return {
+        startDate: $(`#${startId}`)?.value || firstDayOfYear(),
+        endDate: $(`#${endId}`)?.value || today()
+      };
+    }
+
+    function accountOptions(selected = '', predicate = () => true) {
+      return `<option value="">Pilih akun</option>` + state.coa
+        .filter(row => row['Aktif'] !== 'Tidak' && predicate(row))
+        .map(row => `<option value="${escapeHtml(row['Kode Akun'])}" ${String(row['Kode Akun']) === String(selected) ? 'selected' : ''}>${escapeHtml(row['Kode Akun'])} - ${escapeHtml(row['Nama Akun'])}</option>`)
+        .join('');
+    }
+
+    async function ensureCoaLoaded() {
+      if (state.coa.length) return;
+      const response = await rpc('getChartOfAccounts', {});
+      state.coa = response.items || [];
+    }
+
+    async function loadCoa() {
+      $('#coaTable').innerHTML = emptyRow(9, 'Memuat Chart of Accounts...');
+      try {
+        const response = await rpc('getChartOfAccounts', {
+          query: $('#coaQuery').value,
+          type: $('#coaType').value
+        });
+        state.coa = response.items || [];
+        $('#coaCount').textContent = `${response.total || 0} akun`;
+        $('#coaTable').innerHTML = state.coa.length ? state.coa.map(row => `
+          <tr>
+            <td><strong>${escapeHtml(row['Kode Akun'])}</strong></td>
+            <td>${escapeHtml(row['Nama Akun'])}</td>
+            <td>${badge(row['Tipe Akun'])}</td>
+            <td>${escapeHtml(row['Kelompok Laporan'])}</td>
+            <td>${escapeHtml(row['Saldo Normal'])}</td>
+            <td class="money">${money(row['Saldo Awal Debet'])}</td>
+            <td class="money">${money(row['Saldo Awal Kredit'])}</td>
+            <td>${badge(row['Aktif'] === 'Tidak' ? 'Nonaktif' : 'Aktif')}</td>
+            <td><div class="actions">
+              <button class="btn btn-soft btn-mini" data-action="edit-coa" data-id="${escapeHtml(row['Kode Akun'])}">Edit</button>
+              <button class="btn btn-danger btn-mini" data-action="delete-coa" data-id="${escapeHtml(row['Kode Akun'])}">Hapus</button>
+            </div></td>
+          </tr>`).join('') : emptyRow(9, 'Belum ada akun yang sesuai filter.');
+      } catch (error) {
+        $('#coaTable').innerHTML = emptyRow(9, 'Chart of Accounts gagal dimuat.');
+        friendlyError(error);
+      }
+    }
+
+    function openCoaForm(code = '') {
+      const row = state.coa.find(item => String(item['Kode Akun']) === String(code)) || {};
+      const types = ['Aset', 'Liabilitas', 'Ekuitas', 'Pendapatan', 'Beban'];
+      openFormModal({
+        title: code ? `Edit Akun ${escapeHtml(code)}` : 'Tambah Akun',
+        submitLabel: 'Simpan Akun',
+        html: `<div class="form-grid">
+          <div class="field"><label>Kode Akun *</label><input name="code" value="${escapeHtml(row['Kode Akun'] || '')}" ${code ? 'readonly' : ''} required maxlength="30"></div>
+          <div class="field"><label>Nama Akun *</label><input name="name" value="${escapeHtml(row['Nama Akun'] || '')}" required maxlength="150"></div>
+          <div class="field"><label>Tipe Akun *</label><select name="type" required>${types.map(value => `<option ${value === row['Tipe Akun'] ? 'selected' : ''}>${value}</option>`).join('')}</select></div>
+          <div class="field"><label>Kelompok Laporan *</label><input name="reportGroup" value="${escapeHtml(row['Kelompok Laporan'] || '')}" placeholder="Contoh: Kas dan Setara Kas" required></div>
+          <div class="field"><label>Saldo Normal *</label><select name="normalBalance"><option ${row['Saldo Normal'] !== 'Kredit' ? 'selected' : ''}>Debet</option><option ${row['Saldo Normal'] === 'Kredit' ? 'selected' : ''}>Kredit</option></select></div>
+          <div class="field"><label>Status *</label><select name="active"><option ${row['Aktif'] !== 'Tidak' ? 'selected' : ''}>Ya</option><option ${row['Aktif'] === 'Tidak' ? 'selected' : ''}>Tidak</option></select></div>
+          <div class="field"><label>Saldo Awal Debet</label><input name="openingDebit" type="number" min="0" value="${number(row['Saldo Awal Debet'])}"></div>
+          <div class="field"><label>Saldo Awal Kredit</label><input name="openingCredit" type="number" min="0" value="${number(row['Saldo Awal Kredit'])}"></div>
+          <div class="field full"><label>Keterangan</label><textarea name="notes">${escapeHtml(row['Keterangan'] || '')}</textarea></div>
+        </div>`,
+        onSubmit: async data => {
+          await rpc('saveChartAccount', data);
+          closeModal();
+          toast('Chart of Accounts berhasil disimpan.');
+          state.coa = [];
+          loadCoa();
+        }
+      });
+    }
+
+    async function deleteCoa(code) {
+      if (!window.confirm(`Hapus akun ${code}? Akun yang sudah dipakai jurnal tidak dapat dihapus.`)) return;
+      try {
+        setLoading(true, 'Menghapus akun...');
+        const result = await rpc('deleteChartAccount', code);
+        toast(result.message);
+        state.coa = [];
+        loadCoa();
+      } catch (error) {
+        friendlyError(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    async function loadJournal() {
+      $('#journalTable').innerHTML = emptyRow(7, 'Memuat jurnal umum...');
+      try {
+        const response = await rpc('getJournalEntries', {
+          query: $('#journalQuery').value,
+          source: $('#journalSource').value,
+          ...periodFilter('journalStart', 'journalEnd')
+        });
+        state.journal = response.items || [];
+        $('#journalCashIn').textContent = money(response.totalCashIn);
+        $('#journalCashOut').textContent = money(response.totalCashOut);
+        $('#journalNetCashFlow').textContent = money(response.netCashFlow);
+        $('#journalCount').textContent = number(response.totalEntries).toLocaleString('id-ID');
+        let previousJournalId = '';
+        $('#journalTable').innerHTML = state.journal.length ? state.journal.map(row => {
+          const isFirst = row['ID Jurnal'] !== previousJournalId;
+          previousJournalId = row['ID Jurnal'];
+          const isCredit = number(row['Kredit']) > 0;
+          return `<tr class="${isFirst ? 'journal-group-start' : ''}" title="${escapeHtml(row['ID Jurnal'])}">
+            <td>${isFirst ? formatDate(row['Tanggal']) : ''}</td>
+            <td>${isFirst ? `<strong>${escapeHtml(row['No Bukti'] || row['Ref ID'] || '-')}</strong>` : ''}</td>
+            <td><div class="journal-account ${isCredit ? 'credit' : ''}"><code>${escapeHtml(row['Kode Akun'])}</code><span>${escapeHtml(row['Nama Akun'])}</span></div>${isFirst ? `<div class="field-hint">${escapeHtml(row['Keterangan'])}</div>` : ''}</td>
+            <td class="money in">${number(row['Debet']) ? money(row['Debet']) : '-'}</td>
+            <td class="money out">${number(row['Kredit']) ? money(row['Kredit']) : '-'}</td>
+            <td>${isFirst ? badge(row['Sumber']) : ''}</td>
+            <td>${isFirst ? (row['Sumber'] === 'Manual' ? `<button class="btn btn-danger btn-mini" data-action="delete-journal" data-id="${escapeHtml(row['ID Jurnal'])}">Hapus</button>` : '<span class="field-hint">Otomatis</span>') : ''}</td>
+          </tr>`;
+        }).join('') : emptyRow(7, 'Tidak ada jurnal pada periode ini.');
+      } catch (error) {
+        $('#journalTable').innerHTML = emptyRow(7, 'Jurnal umum gagal dimuat.');
+        friendlyError(error);
+      }
+    }
+
+    function journalLineHtml(index) {
+      return `<div class="journal-line" data-journal-line>
+        <select data-line-account required>${accountOptions()}</select>
+        <input data-line-debit type="number" min="0" step="0.01" placeholder="Debet">
+        <input data-line-credit type="number" min="0" step="0.01" placeholder="Kredit">
+        <button class="btn btn-danger btn-mini" type="button" data-remove-journal-line aria-label="Hapus baris">&times;</button>
+      </div>`;
+    }
+
+    async function openManualJournal() {
+      try {
+        setLoading(true, 'Memuat daftar akun...');
+        await ensureCoaLoaded();
+        openFormModal({
+          title: 'Jurnal Umum Manual',
+          submitLabel: 'Posting Jurnal',
+          large: true,
+          html: `<div class="form-grid">
+            <div class="field"><label>Tanggal Jurnal *</label><input name="date" type="date" value="${today()}" required></div>
+            <div class="field"><label>No Bukti</label><input name="voucher" maxlength="80"></div>
+            <div class="field full"><label>Keterangan *</label><textarea name="description" required></textarea></div>
+            <div class="field full">
+              <label>Baris Akun *</label>
+              <div class="journal-lines" id="journalLines">${journalLineHtml(0)}${journalLineHtml(1)}</div>
+              <button class="btn btn-soft btn-mini" id="addJournalLineBtn" type="button" style="margin-top:9px">Tambah Baris</button>
+            </div>
+          </div>`,
+          onReady: () => {
+            $('#addJournalLineBtn').addEventListener('click', () => {
+              $('#journalLines').insertAdjacentHTML('beforeend', journalLineHtml(Date.now()));
+            });
+            $('#journalLines').addEventListener('click', event => {
+              const button = event.target.closest('[data-remove-journal-line]');
+              if (!button) return;
+              if ($$('[data-journal-line]').length <= 2) return toast('Jurnal minimal memiliki dua baris akun.', 'error');
+              button.closest('[data-journal-line]').remove();
+            });
+          },
+          onSubmit: async data => {
+            data.lines = $$('[data-journal-line]').map(line => ({
+              accountCode: $('[data-line-account]', line).value,
+              debit: number($('[data-line-debit]', line).value),
+              credit: number($('[data-line-credit]', line).value)
+            }));
+            const result = await rpc('addManualJournal', data);
+            closeModal();
+            toast(result.message);
+            loadJournal();
+          }
+        });
+      } catch (error) {
+        friendlyError(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    async function syncJournal() {
+      if (!window.confirm('Susun ulang Rincian Kas dan Jurnal dari transaksi operasional? Jurnal manual tetap dipertahankan.')) return;
+      try {
+        setLoading(true, 'Menyusun ulang Rincian Kas dan Jurnal...');
+        const result = await rpc('syncAccountingLedger');
+        toast(`${result.message} ${number(result.rows).toLocaleString('id-ID')} baris diproses.`);
+        loadJournal();
+      } catch (error) {
+        friendlyError(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    async function syncCashBank() {
+      if (!window.confirm('Susun ulang Rincian Kas dan Jurnal dari seluruh transaksi operasional?')) return;
+      try {
+        setLoading(true, 'Menyusun ulang Rincian Kas dan Jurnal...');
+        const result = await rpc('syncCashLedger');
+        toast(result.message);
+        await loadCashBank();
+      } catch (error) {
+        friendlyError(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    async function deleteManualJournal(id) {
+      if (!window.confirm(`Hapus seluruh baris jurnal manual ${id}?`)) return;
+      try {
+        setLoading(true, 'Menghapus jurnal...');
+        const result = await rpc('deleteManualJournal', id);
+        toast(result.message);
+        loadJournal();
+      } catch (error) {
+        friendlyError(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    async function loadCashBank() {
+      $('#cashBankTable').innerHTML = emptyRow(9, 'Memuat rincian kas dan bank...');
+      try {
+        const response = await rpc('getCashBankReport', periodFilter('cashBankStart', 'cashBankEnd'));
+        $('#cashBankOpening').textContent = money(response.openingBalance);
+        $('#cashBankIn').textContent = money(response.totalIn);
+        $('#cashBankOut').textContent = money(response.totalOut);
+        $('#cashBankClosing').textContent = money(response.closingBalance);
+        $('#cashBankTable').innerHTML = response.items.length ? response.items.map(row => `
+          <tr>
+            <td>${formatDate(row.date)}</td>
+            <td>${escapeHtml(row.voucher || '-')}</td>
+            <td><strong>${escapeHtml(row.accountCode)}</strong></td>
+            <td>${escapeHtml(row.accountName)}</td>
+            <td class="wrap">${escapeHtml(row.description)}</td>
+            <td class="money in">${row.incoming ? money(row.incoming) : '-'}</td>
+            <td class="money out">${row.outgoing ? money(row.outgoing) : '-'}</td>
+            <td class="money"><strong>${money(row.balance)}</strong></td>
+            <td><strong>${escapeHtml(row.cashCode || '')}</strong><br><span class="field-hint">${escapeHtml(row.paymentMethod || '')}</span></td>
+          </tr>`).join('') : emptyRow(9, 'Tidak ada mutasi kas atau bank pada periode ini.');
+      } catch (error) {
+        $('#cashBankTable').innerHTML = emptyRow(9, 'Rincian kas dan bank gagal dimuat.');
+        friendlyError(error);
+      }
+    }
+
+    async function loadTrialBalance() {
+      $('#trialTable').innerHTML = emptyRow(8, 'Memuat trial balance...');
+      try {
+        const response = await rpc('getTrialBalance', periodFilter('trialStart', 'trialEnd'));
+        $('#trialStatus').textContent = response.balanced ? 'Seimbang' : `Selisih ${money(response.totals.difference)}`;
+        $('#trialStatus').className = `badge ${response.balanced ? 'badge-green' : 'badge-red'}`;
+        $('#trialTable').innerHTML = response.items.length ? response.items.map(row => `
+          <tr>
+            <td><strong>${escapeHtml(row.code)}</strong></td><td>${escapeHtml(row.name)}</td>
+            <td class="money">${row.openingDebit ? money(row.openingDebit) : '-'}</td>
+            <td class="money">${row.openingCredit ? money(row.openingCredit) : '-'}</td>
+            <td class="money in">${row.debit ? money(row.debit) : '-'}</td>
+            <td class="money out">${row.credit ? money(row.credit) : '-'}</td>
+            <td class="money"><strong>${row.endingDebit ? money(row.endingDebit) : '-'}</strong></td>
+            <td class="money"><strong>${row.endingCredit ? money(row.endingCredit) : '-'}</strong></td>
+          </tr>`).join('') : emptyRow(8, 'Belum ada saldo akun pada periode ini.');
+        const t = response.totals;
+        $('#trialFoot').innerHTML = `<tr><th colspan="2">TOTAL</th><th class="money">${money(t.openingDebit)}</th><th class="money">${money(t.openingCredit)}</th><th class="money">${money(t.debit)}</th><th class="money">${money(t.credit)}</th><th class="money">${money(t.endingDebit)}</th><th class="money">${money(t.endingCredit)}</th></tr>`;
+      } catch (error) {
+        $('#trialTable').innerHTML = emptyRow(8, 'Trial balance gagal dimuat.');
+        friendlyError(error);
+      }
+    }
+
+    function statementGroupsHtml(groups) {
+      return groups.length ? groups.map(group => `
+        <div class="statement-group">
+          <h3>${escapeHtml(group.name)}</h3>
+          ${group.items.map(item => `<div class="statement-line"><span>${escapeHtml(item.code)} · ${escapeHtml(item.name)}</span><strong>${money(item.amount)}</strong></div>`).join('')}
+          <div class="statement-line"><span>Subtotal ${escapeHtml(group.name)}</span><strong>${money(group.total)}</strong></div>
+        </div>`).join('') : '<div class="empty-state">Belum ada saldo.</div>';
+    }
+
+    function statementPanel(title, groups, totalLabel, total) {
+      return `<div class="card statement-panel"><h2>${escapeHtml(title)}</h2>${statementGroupsHtml(groups)}<div class="statement-total"><span>${escapeHtml(totalLabel)}</span><strong>${money(total)}</strong></div></div>`;
+    }
+
+    async function loadBalanceSheet() {
+      $('#balanceStatement').innerHTML = '<div class="card empty-state">Memuat neraca...</div>';
+      try {
+        const response = await rpc('getBalanceSheet', { endDate: $('#balanceDate').value || today() });
+        $('#balanceStatus').textContent = response.balanced ? 'Seimbang' : `Selisih ${money(response.totals.difference)}`;
+        $('#balanceStatus').className = `badge ${response.balanced ? 'badge-green' : 'badge-red'}`;
+        $('#balanceStatement').innerHTML =
+          statementPanel('AKTIVA', response.assets, 'TOTAL AKTIVA', response.totals.assets) +
+          `<div class="statement-stack">${statementPanel('LIABILITAS', response.liabilities, 'TOTAL LIABILITAS', response.totals.liabilities)}${statementPanel('EKUITAS', response.equity, 'TOTAL EKUITAS', response.totals.equity)}<div class="card statement-panel"><div class="statement-total"><span>TOTAL LIABILITAS & EKUITAS</span><strong>${money(response.totals.liabilitiesAndEquity)}</strong></div></div></div>`;
+      } catch (error) {
+        $('#balanceStatement').innerHTML = '<div class="card empty-state">Neraca gagal dimuat.</div>';
+        friendlyError(error);
+      }
+    }
+
+    async function loadIncomeStatement() {
+      $('#incomeStatement').innerHTML = '<div class="card empty-state">Memuat laporan laba rugi...</div>';
+      try {
+        const response = await rpc('getIncomeStatement', periodFilter('incomeStart', 'incomeEnd'));
+        $('#incomeRevenue').textContent = money(response.totalRevenue);
+        $('#incomeExpense').textContent = money(response.totalExpense);
+        $('#incomeNet').textContent = money(response.netIncome);
+        $('#incomeNet').style.color = response.netIncome >= 0 ? 'var(--green)' : 'var(--red)';
+        $('#incomePeriod').textContent = `${formatDate(response.period.start)} - ${formatDate(response.period.end)}`;
+        $('#incomeStatement').innerHTML =
+          statementPanel('PENDAPATAN', response.revenues, 'TOTAL PENDAPATAN', response.totalRevenue) +
+          statementPanel('BEBAN', response.expenses, 'TOTAL BEBAN', response.totalExpense) +
+          `<div class="card statement-panel" style="grid-column:1/-1"><div class="statement-total"><span>SISA HASIL USAHA / LABA BERSIH</span><strong style="color:${response.netIncome >= 0 ? 'var(--green)' : 'var(--red)'}">${money(response.netIncome)}</strong></div></div>`;
+      } catch (error) {
+        $('#incomeStatement').innerHTML = '<div class="card empty-state">Laporan laba rugi gagal dimuat.</div>';
+        friendlyError(error);
+      }
+    }
+
+    async function loadLoanReport() {
+      $('#loanReportTable').innerHTML = emptyRow(10, 'Memuat rincian pinjaman...');
+      try {
+        const response = await rpc('getLoanDetailReport', {
+          status: $('#loanReportStatus').value,
+          ...periodFilter('loanReportStart', 'loanReportEnd')
+        });
+        $('#loanReportPrincipal').textContent = money(response.totals.principal);
+        $('#loanReportMargin').textContent = money(response.totals.margin);
+        $('#loanReportPaid').textContent = money(response.totals.paid);
+        $('#loanReportRemaining').textContent = money(response.totals.remaining);
+        $('#loanReportTable').innerHTML = response.items.length ? response.items.map(row => `
+          <tr>
+            <td><strong>${escapeHtml(row.id)}</strong></td><td>${formatDate(row.date)}</td>
+            <td>${escapeHtml(row.borrower)}</td><td class="money">${money(row.principal)}</td>
+            <td>${formatPercentage(row.percentage)}</td><td class="money">${money(row.marginAmount)}</td>
+            <td class="money">${money(row.totalBill)}</td><td class="money in">${money(row.paid)}</td>
+            <td class="money">${money(row.remaining)}</td><td>${badge(row.status, 'loan')}</td>
+          </tr>`).join('') : emptyRow(10, 'Tidak ada pembiayaan pada filter ini.');
+      } catch (error) {
+        $('#loanReportTable').innerHTML = emptyRow(10, 'Rincian pinjaman gagal dimuat.');
+        friendlyError(error);
+      }
+    }
+
+    async function loadShu() {
+      $('#shuTable').innerHTML = emptyRow(3, 'Memuat pembagian SHU...');
+      try {
+        const response = await rpc('getShuReport', periodFilter('shuStart', 'shuEnd'));
+        $('#shuNet').textContent = money(response.netIncome);
+        $('#shuAllocated').textContent = money(response.totalAllocated);
+        $('#shuRemaining').textContent = money(response.remaining);
+        $('#shuPercentage').textContent = formatPercentage(response.totalPercentage);
+        $('#shuStatus').textContent = response.valid ? 'Alokasi 100%' : `Alokasi ${formatPercentage(response.totalPercentage)}`;
+        $('#shuStatus').className = `badge ${response.valid ? 'badge-green' : 'badge-orange'}`;
+        $('#shuTable').innerHTML = response.allocations.map(row => `
+          <tr><td>${escapeHtml(row.name)}</td><td>${formatPercentage(row.percentage)}</td><td class="money"><strong>${money(row.amount)}</strong></td></tr>`).join('') +
+          `<tr><th>TOTAL</th><th>${formatPercentage(response.totalPercentage)}</th><th class="money">${money(response.totalAllocated)}</th></tr>`;
+      } catch (error) {
+        $('#shuTable').innerHTML = emptyRow(3, 'Pembagian SHU gagal dimuat.');
+        friendlyError(error);
+      }
+    }
+
+    async function loadAssets() {
+      $('#assetTable').innerHTML = emptyRow(11, 'Memuat register aset...');
+      try {
+        const response = await rpc('getFixedAssets', {
+          endDate: $('#assetDate').value || today(),
+          status: $('#assetStatus').value
+        });
+        state.assets = response.items || [];
+        $('#assetCost').textContent = money(response.totals.cost);
+        $('#assetDepreciation').textContent = money(response.totals.accumulatedDepreciation);
+        $('#assetBookValue').textContent = money(response.totals.bookValue);
+        $('#assetCount').textContent = state.assets.length.toLocaleString('id-ID');
+        $('#assetTable').innerHTML = state.assets.length ? state.assets.map(row => `
+          <tr>
+            <td><strong>${escapeHtml(row.id)}</strong></td><td>${formatDate(row.acquisitionDate)}</td>
+            <td>${escapeHtml(row.name)}</td><td>${escapeHtml(row.accountCode)}</td>
+            <td class="money">${money(row.cost)}</td><td>${number(row.usefulLife)} bulan</td>
+            <td class="money">${money(row.monthlyDepreciation)}</td>
+            <td class="money">${money(row.accumulatedDepreciation)}</td>
+            <td class="money"><strong>${money(row.bookValue)}</strong></td><td>${badge(row.status)}</td>
+            <td><div class="actions">
+              <button class="btn btn-soft btn-mini" data-action="edit-asset" data-id="${escapeHtml(row.id)}">Edit</button>
+              <button class="btn btn-danger btn-mini" data-action="delete-asset" data-id="${escapeHtml(row.id)}">Hapus</button>
+            </div></td>
+          </tr>`).join('') : emptyRow(11, 'Belum ada aset tetap.');
+      } catch (error) {
+        $('#assetTable').innerHTML = emptyRow(11, 'Register aset gagal dimuat.');
+        friendlyError(error);
+      }
+    }
+
+    async function openAssetForm(id = '') {
+      try {
+        setLoading(true, 'Memuat daftar akun aset...');
+        await ensureCoaLoaded();
+        const row = state.assets.find(item => item.id === id) || {};
+        openFormModal({
+          title: id ? `Edit Aset ${escapeHtml(id)}` : 'Tambah Aset Tetap',
+          submitLabel: 'Simpan Aset',
+          html: `<input type="hidden" name="id" value="${escapeHtml(id)}">
+            <div class="form-grid">
+              <div class="field"><label>Tanggal Perolehan *</label><input name="acquisitionDate" type="date" value="${escapeHtml(row.acquisitionDate || today())}" required></div>
+              <div class="field"><label>Akun Aset *</label><select name="accountCode" required>${accountOptions(row.accountCode, account => account['Tipe Akun'] === 'Aset' && /^12/.test(String(account['Kode Akun'])))}</select></div>
+              <div class="field full"><label>Nama Aset *</label><input name="name" value="${escapeHtml(row.name || '')}" required></div>
+              <div class="field"><label>Jumlah *</label><input name="quantity" type="number" min="1" value="${number(row.quantity) || 1}" required></div>
+              <div class="field"><label>Harga Perolehan *</label><input name="cost" type="number" min="1" value="${number(row.cost)}" required></div>
+              <div class="field"><label>Nilai Residu *</label><input name="residual" type="number" min="0" value="${number(row.residual)}" required></div>
+              <div class="field"><label>Umur Ekonomis (bulan) *</label><input name="usefulLife" type="number" min="1" value="${number(row.usefulLife) || 48}" required></div>
+              <div class="field"><label>Akumulasi Penyusutan</label><input name="accumulatedDepreciation" type="number" min="0" value="${number(row.accumulatedDepreciation)}"></div>
+              <div class="field"><label>Status *</label><select name="status">${['Aktif','Dijual','Dihapus'].map(value => `<option ${value === (row.status || 'Aktif') ? 'selected' : ''}>${value}</option>`).join('')}</select></div>
+              <div class="field full"><label>Keterangan</label><textarea name="notes">${escapeHtml(row.notes || '')}</textarea></div>
+            </div>`,
+          onSubmit: async data => {
+            const result = await rpc('saveFixedAsset', data);
+            closeModal();
+            toast(result.message);
+            loadAssets();
+          }
+        });
+      } catch (error) {
+        friendlyError(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    async function deleteAsset(id) {
+      if (!window.confirm(`Hapus aset ${id}? Jurnal perolehan terkait akan disusun ulang.`)) return;
+      try {
+        setLoading(true, 'Menghapus aset...');
+        const result = await rpc('deleteFixedAsset', id);
+        toast(result.message);
+        loadAssets();
+      } catch (error) {
+        friendlyError(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    async function loadBenevolent() {
+      $('#benevolentTable').innerHTML = emptyRow(9, 'Memuat dana kebajikan...');
+      try {
+        const response = await rpc('getBenevolentFund', {
+          type: $('#benevolentType').value,
+          ...periodFilter('benevolentStart', 'benevolentEnd')
+        });
+        state.benevolent = response.items || [];
+        $('#benevolentIn').textContent = money(response.totalIncoming);
+        $('#benevolentOut').textContent = money(response.totalOutgoing);
+        $('#benevolentBalance').textContent = money(response.balance);
+        $('#benevolentCount').textContent = state.benevolent.length.toLocaleString('id-ID');
+        $('#benevolentTable').innerHTML = state.benevolent.length ? state.benevolent.map(row => `
+          <tr>
+            <td>${formatDate(row['Tanggal'])}</td><td><strong>${escapeHtml(row['ID Transaksi'])}</strong></td>
+            <td>${badge(row['Tipe'])}</td><td>${escapeHtml(row['Kategori'])}</td>
+            <td class="wrap">${escapeHtml(row['Deskripsi'])}</td><td>${escapeHtml(row['Pihak'] || '-')}</td>
+            <td class="money ${row['Tipe'] === 'Penerimaan' ? 'in' : 'out'}">${money(row['Jumlah'])}</td>
+            <td>${escapeHtml(row['Metode Pembayaran'])}</td>
+            <td><div class="actions">
+              <button class="btn btn-soft btn-mini" data-action="edit-benevolent" data-id="${escapeHtml(row['ID Transaksi'])}">Edit</button>
+              <button class="btn btn-danger btn-mini" data-action="delete-benevolent" data-id="${escapeHtml(row['ID Transaksi'])}">Hapus</button>
+            </div></td>
+          </tr>`).join('') : emptyRow(9, 'Belum ada transaksi dana kebajikan.');
+      } catch (error) {
+        $('#benevolentTable').innerHTML = emptyRow(9, 'Dana kebajikan gagal dimuat.');
+        friendlyError(error);
+      }
+    }
+
+    function openBenevolentForm(id = '') {
+      const row = state.benevolent.find(item => item['ID Transaksi'] === id) || {};
+      openFormModal({
+        title: id ? `Edit Transaksi ${escapeHtml(id)}` : 'Transaksi Dana Kebajikan',
+        submitLabel: 'Simpan Transaksi',
+        html: `<input type="hidden" name="id" value="${escapeHtml(id)}">
+          <div class="form-grid">
+            <div class="field"><label>Tanggal *</label><input name="date" type="date" value="${escapeHtml(row['Tanggal'] || today())}" required></div>
+            <div class="field"><label>Tipe *</label><select name="type"><option ${row['Tipe'] !== 'Penyaluran' ? 'selected' : ''}>Penerimaan</option><option ${row['Tipe'] === 'Penyaluran' ? 'selected' : ''}>Penyaluran</option></select></div>
+            <div class="field"><label>Kategori *</label><input name="category" value="${escapeHtml(row['Kategori'] || '')}" placeholder="Zakat, infak, sosial, denda..." required></div>
+            <div class="field"><label>Metode Pembayaran *</label><select name="paymentMethod">${['Kas','Bank','Transfer'].map(value => `<option ${value === row['Metode Pembayaran'] ? 'selected' : ''}>${value}</option>`).join('')}</select></div>
+            <div class="field full"><label>Deskripsi *</label><textarea name="description" required>${escapeHtml(row['Deskripsi'] || '')}</textarea></div>
+            <div class="field"><label>Pihak</label><input name="party" value="${escapeHtml(row['Pihak'] || '')}"></div>
+            <div class="field"><label>Jumlah *</label><input name="amount" type="number" min="1" value="${number(row['Jumlah'])}" required></div>
+            <div class="field full"><label>Referensi</label><input name="refId" value="${escapeHtml(row['Ref ID'] || '')}"></div>
+          </div>`,
+        onSubmit: async data => {
+          const result = await rpc('saveBenevolentFund', data);
+          closeModal();
+          toast(result.message);
+          loadBenevolent();
+        }
+      });
+    }
+
+    async function deleteBenevolent(id) {
+      if (!window.confirm(`Hapus transaksi dana kebajikan ${id}?`)) return;
+      try {
+        setLoading(true, 'Menghapus transaksi...');
+        const result = await rpc('deleteBenevolentFund', id);
+        toast(result.message);
+        loadBenevolent();
+      } catch (error) {
+        friendlyError(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    async function loadDocuments() {
+      $('#documentTable').innerHTML = emptyRow(8, 'Memuat register dokumen...');
+      try {
+        const response = await rpc('getAdministrationDocuments', {
+          query: $('#documentQuery').value,
+          category: $('#documentCategory').value
+        });
+        state.documents = response.items || [];
+        $('#documentCount').textContent = `${response.total || 0} dokumen`;
+        $('#documentTable').innerHTML = state.documents.length ? state.documents.map(row => `
+          <tr>
+            <td>${formatDate(row['Tanggal'])}</td><td><strong>${escapeHtml(row['Nomor Dokumen'])}</strong></td>
+            <td>${escapeHtml(row['Kategori'])}</td><td>${escapeHtml(row['Nama Dokumen'])}</td>
+            <td>${badge(row['Status'])}</td><td>${formatDate(row['Jatuh Tempo'])}</td>
+            <td>${row['Link Drive'] ? `<a class="btn btn-soft btn-mini" href="${escapeHtml(row['Link Drive'])}" target="_blank" rel="noopener">Buka</a>` : '-'}</td>
+            <td><div class="actions">
+              <button class="btn btn-soft btn-mini" data-action="edit-document" data-id="${escapeHtml(row['ID Dokumen'])}">Edit</button>
+              <button class="btn btn-danger btn-mini" data-action="delete-document" data-id="${escapeHtml(row['ID Dokumen'])}">Hapus</button>
+            </div></td>
+          </tr>`).join('') : emptyRow(8, 'Belum ada dokumen administrasi.');
+      } catch (error) {
+        $('#documentTable').innerHTML = emptyRow(8, 'Register dokumen gagal dimuat.');
+        friendlyError(error);
+      }
+    }
+
+    function openDocumentForm(id = '') {
+      const row = state.documents.find(item => item['ID Dokumen'] === id) || {};
+      const categories = ['Legalitas','RAT','Perpajakan','Akad','SOP','Laporan','Lainnya'];
+      openFormModal({
+        title: id ? `Edit Dokumen ${escapeHtml(row['Nomor Dokumen'])}` : 'Tambah Dokumen Administrasi',
+        submitLabel: 'Simpan Dokumen',
+        html: `<input type="hidden" name="id" value="${escapeHtml(id)}">
+          <div class="form-grid">
+            <div class="field"><label>Tanggal Dokumen *</label><input name="date" type="date" value="${escapeHtml(row['Tanggal'] || today())}" required></div>
+            <div class="field"><label>Kategori *</label><select name="category">${categories.map(value => `<option ${value === row['Kategori'] ? 'selected' : ''}>${value}</option>`).join('')}</select></div>
+            <div class="field"><label>Nomor Dokumen *</label><input name="documentNumber" value="${escapeHtml(row['Nomor Dokumen'] || '')}" required></div>
+            <div class="field"><label>Status *</label><select name="status">${['Aktif','Berlaku','Selesai','Kedaluwarsa','Arsip'].map(value => `<option ${value === row['Status'] ? 'selected' : ''}>${value}</option>`).join('')}</select></div>
+            <div class="field full"><label>Nama Dokumen *</label><input name="documentName" value="${escapeHtml(row['Nama Dokumen'] || '')}" required></div>
+            <div class="field"><label>Jatuh Tempo</label><input name="dueDate" type="date" value="${escapeHtml(row['Jatuh Tempo'] || '')}"></div>
+            <div class="field"><label>Link Google Drive / URL</label><input name="link" type="url" value="${escapeHtml(row['Link Drive'] || '')}" placeholder="https://..."></div>
+            <div class="field full"><label>Keterangan</label><textarea name="notes">${escapeHtml(row['Keterangan'] || '')}</textarea></div>
+          </div>`,
+        onSubmit: async data => {
+          const result = await rpc('saveAdministrationDocument', data);
+          closeModal();
+          toast(result.message);
+          loadDocuments();
+        }
+      });
+    }
+
+    async function deleteDocument(id) {
+      if (!window.confirm(`Hapus dokumen administrasi ${id}?`)) return;
+      try {
+        setLoading(true, 'Menghapus dokumen...');
+        const result = await rpc('deleteAdministrationDocument', id);
+        toast(result.message);
+        loadDocuments();
+      } catch (error) {
+        friendlyError(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    function currentExportFilter() {
+      const mapping = {
+        journal: ['journalStart', 'journalEnd'],
+        cashbank: ['cashBankStart', 'cashBankEnd'],
+        trial: ['trialStart', 'trialEnd'],
+        income: ['incomeStart', 'incomeEnd'],
+        loanreport: ['loanReportStart', 'loanReportEnd'],
+        shu: ['shuStart', 'shuEnd'],
+        benevolent: ['benevolentStart', 'benevolentEnd']
+      };
+      if (state.currentPage === 'balance') return { startDate: firstDayOfYear(), endDate: $('#balanceDate').value || today() };
+      if (state.currentPage === 'assets') return { startDate: firstDayOfYear(), endDate: $('#assetDate').value || today() };
+      const ids = mapping[state.currentPage] || ['incomeStart', 'incomeEnd'];
+      return periodFilter(ids[0], ids[1]);
+    }
+
+    async function downloadFinancialExcel() {
+      try {
+        setLoading(true, 'Menyusun workbook laporan keuangan...');
+        const file = await rpc('generateFinancialWorkbookExcel', currentExportFilter());
+        const bytes = atob(file.base64);
+        const array = new Uint8Array(bytes.length);
+        for (let i = 0; i < bytes.length; i++) array[i] = bytes.charCodeAt(i);
+        const url = URL.createObjectURL(new Blob([array], { type: file.mimeType }));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = file.fileName || 'Laporan-Keuangan-Koperasi-MIKA.xlsx';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        toast('Workbook Excel laporan keuangan berhasil dibuat.');
+      } catch (error) {
+        friendlyError(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    async function downloadFinancialPdf() {
+      try {
+        setLoading(true, 'Menyusun laporan PDF...');
+        const file = await rpc(
+          'generateAccountingReportPdf',
+          state.currentPage,
+          currentExportFilter()
+        );
+        const bytes = atob(file.base64);
+        const array = new Uint8Array(bytes.length);
+        for (let i = 0; i < bytes.length; i++) array[i] = bytes.charCodeAt(i);
+        const url = URL.createObjectURL(new Blob([array], {
+          type: file.mimeType || 'application/pdf'
+        }));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = file.fileName || 'Laporan-Koperasi-MIKA.pdf';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        toast('Laporan PDF berhasil dibuat.');
+      } catch (error) {
+        friendlyError(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
     async function loadReport() {
       $('#reportTable').innerHTML = emptyRow(6, 'Memuat laporan keuangan...');
       try {
@@ -1736,6 +2785,15 @@
       if (action.dataset.action === 'edit-installment') openEditInstallment(id, action.dataset.loanId);
       if (action.dataset.action === 'delete-installment') deleteInstallment(id, action.dataset.loanId);
       if (action.dataset.action === 'installment-receipt') downloadReceipt('generateInstallmentReceiptPdf', id);
+      if (action.dataset.action === 'edit-coa') openCoaForm(id);
+      if (action.dataset.action === 'delete-coa') deleteCoa(id);
+      if (action.dataset.action === 'delete-journal') deleteManualJournal(id);
+      if (action.dataset.action === 'edit-asset') openAssetForm(id);
+      if (action.dataset.action === 'delete-asset') deleteAsset(id);
+      if (action.dataset.action === 'edit-benevolent') openBenevolentForm(id);
+      if (action.dataset.action === 'delete-benevolent') deleteBenevolent(id);
+      if (action.dataset.action === 'edit-document') openDocumentForm(id);
+      if (action.dataset.action === 'delete-document') deleteDocument(id);
     });
 
     $('#mobileToggle').addEventListener('click', () => $('#sidebar').classList.toggle('open'));
@@ -1758,6 +2816,29 @@
     $('#addLoanBtn').addEventListener('click', openAddLoan);
     $('#filterLoansBtn').addEventListener('click', loadLoans);
     $('#loanQuery').addEventListener('keydown', event => { if (event.key === 'Enter') loadLoans(); });
+    $('#addCoaBtn').addEventListener('click', () => openCoaForm());
+    $('#filterCoaBtn').addEventListener('click', loadCoa);
+    $('#coaQuery').addEventListener('keydown', event => { if (event.key === 'Enter') loadCoa(); });
+    $('#addJournalBtn').addEventListener('click', openManualJournal);
+    $('#syncJournalBtn').addEventListener('click', syncJournal);
+    $('#filterJournalBtn').addEventListener('click', loadJournal);
+    $('#journalQuery').addEventListener('keydown', event => { if (event.key === 'Enter') loadJournal(); });
+    $('#showCashBankBtn').addEventListener('click', loadCashBank);
+    $('#syncCashBankBtn').addEventListener('click', syncCashBank);
+    $('#showTrialBtn').addEventListener('click', loadTrialBalance);
+    $('#showBalanceBtn').addEventListener('click', loadBalanceSheet);
+    $('#showIncomeBtn').addEventListener('click', loadIncomeStatement);
+    $('#showLoanReportBtn').addEventListener('click', loadLoanReport);
+    $('#showShuBtn').addEventListener('click', loadShu);
+    $('#addAssetBtn').addEventListener('click', () => openAssetForm());
+    $('#showAssetsBtn').addEventListener('click', loadAssets);
+    $('#addBenevolentBtn').addEventListener('click', () => openBenevolentForm());
+    $('#showBenevolentBtn').addEventListener('click', loadBenevolent);
+    $('#addDocumentBtn').addEventListener('click', () => openDocumentForm());
+    $('#filterDocumentsBtn').addEventListener('click', loadDocuments);
+    $('#documentQuery').addEventListener('keydown', event => { if (event.key === 'Enter') loadDocuments(); });
+    $$('.erp-export-excel').forEach(button => button.addEventListener('click', downloadFinancialExcel));
+    $$('.erp-export-pdf').forEach(button => button.addEventListener('click', downloadFinancialPdf));
     $('#showReportBtn').addEventListener('click', loadReport);
     $('#printReportBtn').addEventListener('click', () => window.print());
     $('#saveSettingsBtn').addEventListener('click', saveSettings);

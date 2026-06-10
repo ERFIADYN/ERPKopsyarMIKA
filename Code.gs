@@ -6,7 +6,7 @@
 const SPREADSHEET_ID = '1rsX3XUeippTQCUlgrA_UdKf-iRB2-vmkC-X8ji8cMWQ';
 const APP_TIMEZONE = 'Asia/Jakarta';
 const DEFAULT_OFFICER = 'Administrator';
-const SETUP_VERSION = 'MIKA_SCHEMA_2026_06_V2';
+const SETUP_VERSION = 'MIKA_ERP_SCHEMA_2026_06_V4';
 const DEFAULT_LOGO_URL =
   'https://raw.githubusercontent.com/ERFIADYN/ERPKopsyarMIKA/main/kami.jpg-removebg-preview.png';
 const EMBEDDED_LOGO_BASE64 = 'iVBORw0KGgoAAAANSUhEUgAAASEAAAErCAYAAACRhjV9AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAA' +
@@ -2070,8 +2070,31 @@ const SCHEMA = {
     'Keterangan', 'Petugas'
   ],
   Kas: [
-    'ID Kas', 'Tanggal', 'Kategori', 'Deskripsi', 'Masuk', 'Keluar',
+    'ID Kas', 'Tanggal', 'Kode Akun', 'Nama Akun', 'Kategori', 'Deskripsi',
+    'Masuk', 'Keluar', 'Saldo', 'Kode Kas/Bank', 'Pembayaran Via',
     'Sumber Transaksi', 'Ref ID'
+  ],
+  COA: [
+    'Kode Akun', 'Nama Akun', 'Tipe Akun', 'Kelompok Laporan',
+    'Saldo Normal', 'Saldo Awal Debet', 'Saldo Awal Kredit', 'Aktif',
+    'Keterangan'
+  ],
+  Jurnal: [
+    'ID Jurnal', 'Tanggal', 'No Bukti', 'Sumber', 'Ref ID', 'Keterangan',
+    'Kode Akun', 'Nama Akun', 'Debet', 'Kredit', 'Petugas', 'Status'
+  ],
+  'Aset Tetap': [
+    'ID Aset', 'Tanggal Perolehan', 'Kode Akun Aset', 'Nama Aset',
+    'Jumlah', 'Harga Perolehan', 'Nilai Residu', 'Umur Ekonomis Bulan',
+    'Metode', 'Akumulasi Penyusutan', 'Nilai Buku', 'Status', 'Keterangan'
+  ],
+  'Dana Kebajikan': [
+    'ID Transaksi', 'Tanggal', 'Tipe', 'Kategori', 'Deskripsi', 'Pihak',
+    'Jumlah', 'Metode Pembayaran', 'Ref ID', 'Petugas'
+  ],
+  Administrasi: [
+    'ID Dokumen', 'Tanggal', 'Kategori', 'Nomor Dokumen', 'Nama Dokumen',
+    'Link Drive', 'Status', 'Jatuh Tempo', 'Keterangan'
   ],
   Pengaturan: ['Key', 'Value', 'Deskripsi']
 };
@@ -2102,7 +2125,57 @@ const DEFAULT_SETTINGS = [
   ['simpanan_pokok', '165000', 'Simpanan pokok anggota baru'],
   ['simpanan_wajib', '50000', 'Simpanan wajib bulanan'],
   ['margin_pinjaman', '5', 'Persentase tahunan pembiayaan'],
-  ['biaya_admin', '20000', 'Biaya administrasi pembiayaan']
+  ['biaya_admin', '20000', 'Biaya administrasi pembiayaan'],
+  ['akun_kas_default', '1111', 'Kode akun kas utama'],
+  ['akun_bank_default', '11121', 'Kode akun bank utama'],
+  ['shu_cadangan', '30', 'Persentase SHU untuk cadangan koperasi'],
+  ['shu_jasa_simpanan', '30', 'Persentase SHU berdasarkan simpanan anggota'],
+  ['shu_jasa_pinjaman', '0', 'Persentase SHU berdasarkan pinjaman anggota'],
+  ['shu_pengurus', '0', 'Persentase SHU bagian pengurus'],
+  ['shu_pengelola', '15', 'Persentase SHU bonus pengelola'],
+  ['shu_pendidikan', '20', 'Persentase SHU pendidikan dan partisipasi anggota'],
+  ['shu_pembangunan', '0', 'Persentase SHU pembangunan koperasi'],
+  ['shu_sosial', '5', 'Persentase SHU dana sosial']
+];
+
+const DEFAULT_COA = [
+  ['1111', 'Kas Koperasi', 'Aset', 'Kas dan Setara Kas', 'Debet', 0, 0, 'Ya', 'Kas tunai operasional'],
+  ['11121', 'Bank Syariah Indonesia', 'Aset', 'Kas dan Setara Kas', 'Debet', 0, 0, 'Ya', 'Rekening bank utama'],
+  ['11122', 'Bank Mandiri', 'Aset', 'Kas dan Setara Kas', 'Debet', 0, 0, 'Ya', 'Rekening bank'],
+  ['11123', 'Bank BCA', 'Aset', 'Kas dan Setara Kas', 'Debet', 0, 0, 'Ya', 'Rekening bank'],
+  ['11124', 'Bank BRI', 'Aset', 'Kas dan Setara Kas', 'Debet', 0, 0, 'Ya', 'Rekening bank'],
+  ['1121', 'Piutang Anggota', 'Aset', 'Piutang', 'Debet', 0, 0, 'Ya', 'Piutang anggota lainnya'],
+  ['1131', 'Piutang Qardh', 'Aset', 'Piutang Pembiayaan', 'Debet', 0, 0, 'Ya', 'Pembiayaan qardh'],
+  ['1132', 'Piutang Murabahah', 'Aset', 'Piutang Pembiayaan', 'Debet', 0, 0, 'Ya', 'Pembiayaan murabahah dan pembiayaan anggota'],
+  ['1139', 'Margin Pembiayaan Ditangguhkan', 'Aset', 'Piutang Pembiayaan', 'Kredit', 0, 0, 'Tidak', 'Akun legacy; tidak digunakan pada model pencatatan baru'],
+  ['1141', 'Persediaan', 'Aset', 'Persediaan', 'Debet', 0, 0, 'Ya', 'Persediaan usaha koperasi'],
+  ['1211', 'Tanah', 'Aset', 'Aset Tetap', 'Debet', 0, 0, 'Ya', 'Aset tetap tanah'],
+  ['1221', 'Bangunan', 'Aset', 'Aset Tetap', 'Debet', 0, 0, 'Ya', 'Aset tetap bangunan'],
+  ['1231', 'Kendaraan', 'Aset', 'Aset Tetap', 'Debet', 0, 0, 'Ya', 'Aset tetap kendaraan'],
+  ['1241', 'Peralatan', 'Aset', 'Aset Tetap', 'Debet', 0, 0, 'Ya', 'Peralatan kantor dan operasional'],
+  ['1251', 'Akumulasi Penyusutan Bangunan', 'Aset', 'Akumulasi Penyusutan', 'Kredit', 0, 0, 'Ya', 'Kontra aset bangunan'],
+  ['1252', 'Akumulasi Penyusutan Kendaraan', 'Aset', 'Akumulasi Penyusutan', 'Kredit', 0, 0, 'Ya', 'Kontra aset kendaraan'],
+  ['1253', 'Akumulasi Penyusutan Peralatan', 'Aset', 'Akumulasi Penyusutan', 'Kredit', 0, 0, 'Ya', 'Kontra aset peralatan'],
+  ['2111', 'Hutang Usaha', 'Liabilitas', 'Liabilitas Jangka Pendek', 'Kredit', 0, 0, 'Ya', 'Kewajiban usaha'],
+  ['2141', 'Dana SHU Belum Dibagikan', 'Liabilitas', 'SHU Belum Dibagikan', 'Kredit', 0, 0, 'Ya', 'Kewajiban pembagian SHU'],
+  ['2151', 'Simpanan Sukarela', 'Liabilitas', 'Simpanan Anggota', 'Kredit', 0, 0, 'Ya', 'Simpanan sukarela anggota'],
+  ['2161', 'Dana Kebajikan', 'Liabilitas', 'Dana Kebajikan', 'Kredit', 0, 0, 'Ya', 'Dana sosial/kebajikan yang belum disalurkan'],
+  ['3111', 'Simpanan Pokok', 'Ekuitas', 'Modal Anggota', 'Kredit', 0, 0, 'Ya', 'Simpanan pokok anggota'],
+  ['3121', 'Simpanan Wajib', 'Ekuitas', 'Modal Anggota', 'Kredit', 0, 0, 'Ya', 'Simpanan wajib anggota'],
+  ['3131', 'Cadangan Koperasi', 'Ekuitas', 'Cadangan Koperasi', 'Kredit', 0, 0, 'Ya', 'Cadangan hasil usaha'],
+  ['3191', 'SHU Tahun Berjalan', 'Ekuitas', 'SHU Tahun Berjalan', 'Kredit', 0, 0, 'Ya', 'Akun penyajian hasil usaha berjalan'],
+  ['4111', 'Pendapatan Margin Pembiayaan', 'Pendapatan', 'Pendapatan Usaha', 'Kredit', 0, 0, 'Ya', 'Pendapatan margin murabahah'],
+  ['4121', 'Pendapatan Administrasi Pembiayaan', 'Pendapatan', 'Pendapatan Usaha', 'Kredit', 0, 0, 'Ya', 'Pendapatan biaya administrasi'],
+  ['4131', 'Pendapatan Usaha Lainnya', 'Pendapatan', 'Pendapatan Usaha', 'Kredit', 0, 0, 'Ya', 'Pendapatan operasional lainnya'],
+  ['7111', 'Pendapatan Bagi Hasil Bank', 'Pendapatan', 'Pendapatan Lainnya', 'Kredit', 0, 0, 'Ya', 'Bagi hasil rekening bank'],
+  ['7211', 'Beban Gaji dan Honor', 'Beban', 'Beban Operasional', 'Debet', 0, 0, 'Ya', 'Beban pegawai dan pengurus'],
+  ['7221', 'Beban Administrasi Bank', 'Beban', 'Beban Administrasi', 'Debet', 0, 0, 'Ya', 'Biaya administrasi bank'],
+  ['7231', 'Beban Pajak', 'Beban', 'Beban Administrasi', 'Debet', 0, 0, 'Ya', 'Pajak koperasi'],
+  ['7241', 'Beban Penyusutan', 'Beban', 'Beban Operasional', 'Debet', 0, 0, 'Ya', 'Penyusutan aset tetap'],
+  ['7251', 'Beban Rapat Anggota Tahunan', 'Beban', 'Beban Operasional', 'Debet', 0, 0, 'Ya', 'Biaya RAT'],
+  ['7261', 'Beban Kantor dan Umum', 'Beban', 'Beban Administrasi', 'Debet', 0, 0, 'Ya', 'Beban umum kantor'],
+  ['7271', 'Beban Sosial dan Kebajikan', 'Beban', 'Beban Lainnya', 'Debet', 0, 0, 'Ya', 'Penyaluran sosial dari biaya koperasi'],
+  ['7291', 'Beban Lainnya', 'Beban', 'Beban Lainnya', 'Debet', 0, 0, 'Ya', 'Beban di luar kelompok utama']
 ];
 
 function doGet() {
@@ -2128,10 +2201,12 @@ function getDb_() {
 function ensureSetup(force) {
   var ss = getDb_();
   var properties = PropertiesService.getDocumentProperties() || PropertiesService.getScriptProperties();
+  var versionChanged =
+    properties.getProperty('MIKA_SETUP_VERSION') !== SETUP_VERSION;
   var sheetsReady = Object.keys(SCHEMA).every(function(name) {
     return !!ss.getSheetByName(name);
   });
-  if (!force && sheetsReady && properties.getProperty('MIKA_SETUP_VERSION') === SETUP_VERSION) {
+  if (!force && sheetsReady && !versionChanged) {
     return {
       success: true,
       message: 'Database siap digunakan.',
@@ -2146,11 +2221,22 @@ function ensureSetup(force) {
       ensureSheet_(ss, name, SCHEMA[name]);
     });
     seedSettings_();
+    seedCoa_();
+    deactivateLegacyAccounts_();
     var cashSheet = ss.getSheetByName('Kas');
-    var hasTransactions = ['Simpanan', 'Pinjaman', 'Angsuran'].some(function(name) {
+    var hasTransactions = [
+      'Anggota', 'Simpanan', 'Pinjaman', 'Angsuran',
+      'Aset Tetap', 'Dana Kebajikan'
+    ].some(function(name) {
       return ss.getSheetByName(name).getLastRow() > 1;
     });
-    if (cashSheet.getLastRow() < 2 && hasTransactions) rebuildCashLedger_();
+    if ((versionChanged || cashSheet.getLastRow() < 2) && hasTransactions) {
+      rebuildCashLedger_();
+    }
+    var journalSheet = ss.getSheetByName('Jurnal');
+    if ((versionChanged || journalSheet.getLastRow() < 2) && hasTransactions) {
+      rebuildAccountingLedger_();
+    }
     formatSheets_();
     properties.setProperty('MIKA_SETUP_VERSION', SETUP_VERSION);
     return {
@@ -2360,20 +2446,38 @@ function migrateLegacyRows_(sheetName, values) {
   }
 
   if (sheetName === 'Kas') {
+    var legacyCoa = getCoaMap_();
     return rows.map(function(row) {
       var nominal = number_(value(row, ['Nominal']));
       var type = String(value(row, ['Tipe']) || '');
       var masuk = number_(value(row, ['Masuk'])) || (/masuk/i.test(type) ? nominal : 0);
       var keluar = number_(value(row, ['Keluar'])) || (/keluar/i.test(type) ? nominal : 0);
       if (!masuk && !keluar) return null;
+      var category = value(row, ['Kategori']) || 'Lainnya';
+      var description = value(row, ['Deskripsi', 'Keterangan']) || 'Migrasi data lama';
+      var source = value(row, ['Sumber Transaksi']) || 'Migrasi';
+      var accountCode = String(
+        value(row, ['Kode Akun', 'COA']) ||
+        cashCounterpartAccountCode_(category, description, masuk, keluar)
+      );
+      var cashCode = String(
+        value(row, ['Kode Kas/Bank', 'Pembayaran Via']) ||
+        cashAccountCode_()
+      );
       return [
         value(row, ['ID Kas', 'ID_Kas']),
         value(row, ['Tanggal']),
-        value(row, ['Kategori']) || 'Lainnya',
-        value(row, ['Deskripsi', 'Keterangan']) || 'Migrasi data lama',
+        accountCode,
+        value(row, ['Nama Akun', 'Akun']) ||
+          (legacyCoa[accountCode] ? legacyCoa[accountCode]['Nama Akun'] : ''),
+        category,
+        description,
         masuk,
         keluar,
-        value(row, ['Sumber Transaksi']) || 'Migrasi',
+        number_(value(row, ['Saldo'])),
+        cashCode,
+        legacyCoa[cashCode] ? legacyCoa[cashCode]['Nama Akun'] : 'Kas/Bank',
+        source,
         value(row, ['Ref ID']) || ''
       ];
     }).filter(Boolean);
@@ -2396,6 +2500,100 @@ function migrateLegacyRows_(sheetName, values) {
     }).filter(function(row) { return row[0]; });
   }
 
+  if (sheetName === 'COA') {
+    return rows.map(function(row) {
+      var code = value(row, ['Kode Akun', 'No Akun', 'Nomor Akun']);
+      var type = value(row, ['Tipe Akun', 'Jenis Akun']);
+      var accountName = value(row, ['Nama Akun', 'Akun']);
+      if (!type) type = inferAccountType_(code, accountName);
+      return [
+        String(code || ''),
+        accountName,
+        type,
+        value(row, ['Kelompok Laporan', 'Kelompok']) || defaultReportGroup_(type),
+        value(row, ['Saldo Normal']) || defaultNormalBalance_(type),
+        number_(value(row, ['Saldo Awal Debet', 'Debet'])),
+        number_(value(row, ['Saldo Awal Kredit', 'Kredit'])),
+        value(row, ['Aktif', 'Status']) || 'Ya',
+        value(row, ['Keterangan']) || 'Migrasi data lama'
+      ];
+    }).filter(function(row) { return row[0] && row[1]; });
+  }
+
+  if (sheetName === 'Jurnal') {
+    return rows.map(function(row) {
+      return [
+        value(row, ['ID Jurnal', 'ID']),
+        value(row, ['Tanggal']),
+        value(row, ['No Bukti', 'Nomor Bukti']),
+        value(row, ['Sumber']) || 'Migrasi',
+        value(row, ['Ref ID', 'Referensi']),
+        value(row, ['Keterangan', 'Deskripsi']),
+        String(value(row, ['Kode Akun', 'COA']) || ''),
+        value(row, ['Nama Akun', 'Akun']),
+        number_(value(row, ['Debet', 'Debit'])),
+        number_(value(row, ['Kredit'])),
+        value(row, ['Petugas']) || 'Migrasi Data',
+        value(row, ['Status']) || 'Posted'
+      ];
+    }).filter(function(row) { return row[0] && row[6]; });
+  }
+
+  if (sheetName === 'Aset Tetap') {
+    return rows.map(function(row) {
+      var cost = number_(value(row, ['Harga Perolehan', 'Harga']));
+      var accumulated = number_(value(row, ['Akumulasi Penyusutan', 'Penyusutan']));
+      return [
+        value(row, ['ID Aset', 'ID']),
+        value(row, ['Tanggal Perolehan', 'Tgl Beli', 'Tanggal']),
+        String(value(row, ['Kode Akun Aset', 'Kode Akun']) || ''),
+        value(row, ['Nama Aset', 'Nama Barang']),
+        number_(value(row, ['Jumlah'])) || 1,
+        cost,
+        number_(value(row, ['Nilai Residu'])),
+        number_(value(row, ['Umur Ekonomis Bulan', 'Umur Ekonomis'])),
+        value(row, ['Metode']) || 'Garis Lurus',
+        accumulated,
+        number_(value(row, ['Nilai Buku'])) || Math.max(0, cost - accumulated),
+        value(row, ['Status']) || 'Aktif',
+        value(row, ['Keterangan'])
+      ];
+    }).filter(function(row) { return row[0] && row[3]; });
+  }
+
+  if (sheetName === 'Dana Kebajikan') {
+    return rows.map(function(row) {
+      return [
+        value(row, ['ID Transaksi', 'ID']),
+        value(row, ['Tanggal']),
+        value(row, ['Tipe']),
+        value(row, ['Kategori']),
+        value(row, ['Deskripsi', 'Keterangan']),
+        value(row, ['Pihak']),
+        number_(value(row, ['Jumlah', 'Nominal'])),
+        value(row, ['Metode Pembayaran', 'Metode']) || 'Kas',
+        value(row, ['Ref ID', 'Referensi']),
+        value(row, ['Petugas']) || 'Migrasi Data'
+      ];
+    }).filter(function(row) { return row[0]; });
+  }
+
+  if (sheetName === 'Administrasi') {
+    return rows.map(function(row) {
+      return [
+        value(row, ['ID Dokumen', 'ID']),
+        value(row, ['Tanggal']),
+        value(row, ['Kategori']),
+        value(row, ['Nomor Dokumen', 'Nomor']),
+        value(row, ['Nama Dokumen', 'Dokumen']),
+        value(row, ['Link Drive', 'Link']),
+        value(row, ['Status']) || 'Aktif',
+        value(row, ['Jatuh Tempo']),
+        value(row, ['Keterangan'])
+      ];
+    }).filter(function(row) { return row[0]; });
+  }
+
   return [];
 }
 
@@ -2415,6 +2613,29 @@ function seedSettings_() {
   if (missing.length) {
     sheet.getRange(sheet.getLastRow() + 1, 1, missing.length, 3).setValues(missing);
   }
+}
+
+function seedCoa_() {
+  var sheet = getDb_().getSheetByName('COA');
+  var existing = {};
+  if (sheet.getLastRow() > 1) {
+    sheet.getRange(2, 1, sheet.getLastRow() - 1, 1).getDisplayValues()
+      .forEach(function(row) { existing[String(row[0])] = true; });
+  }
+  var missing = DEFAULT_COA.filter(function(row) { return !existing[String(row[0])]; });
+  if (missing.length) {
+    sheet.getRange(sheet.getLastRow() + 1, 1, missing.length, SCHEMA.COA.length)
+      .setValues(missing);
+  }
+}
+
+function deactivateLegacyAccounts_() {
+  var sheet = getDb_().getSheetByName('COA');
+  var found = findRowById_('COA', '1139');
+  if (!found) return;
+  found.values[7] = 'Tidak';
+  found.values[8] = 'Akun legacy; tidak digunakan pada model pencatatan baru';
+  sheet.getRange(found.row, 1, 1, found.values.length).setValues([found.values]);
 }
 
 function formatSheets_() {
@@ -2440,7 +2661,16 @@ function formatSheets_() {
     ['dd/MM/yyyy', '#,##0', '0.00"%"', '#,##0.00']
   );
   setFormats_('Angsuran', ['B:B', 'G:H'], ['yyyy-mm-dd', '#,##0']);
-  setFormats_('Kas', ['B:B', 'E:F'], ['yyyy-mm-dd', '#,##0']);
+  setFormats_('Kas', ['B:B', 'G:I'], ['dd/MM/yyyy', '#,##0']);
+  setFormats_('COA', ['F:G'], ['#,##0']);
+  setFormats_('Jurnal', ['B:B', 'I:J'], ['dd/MM/yyyy', '#,##0']);
+  setFormats_(
+    'Aset Tetap',
+    ['B:B', 'E:K'],
+    ['dd/MM/yyyy', '#,##0', '#,##0', '#,##0', '#,##0', '#,##0', '#,##0']
+  );
+  setFormats_('Dana Kebajikan', ['B:B', 'G:G'], ['dd/MM/yyyy', '#,##0']);
+  setFormats_('Administrasi', ['B:B', 'H:H'], ['dd/MM/yyyy', 'dd/MM/yyyy']);
 }
 
 function setFormats_(sheetName, ranges, formats) {
@@ -2471,7 +2701,7 @@ function getDashboardData(filter) {
   var loanRows = getObjects_('Pinjaman');
   var memberRows = getObjects_('Anggota');
 
-  var totalCash = cashRows.reduce(function(total, row) {
+  var totalCash = getCashOpeningBalance_() + cashRows.reduce(function(total, row) {
     return total + number_(row['Masuk']) - number_(row['Keluar']);
   }, 0);
   var savingsSummary = getSavingsSummary_(savingsRows, memberRows);
@@ -2612,6 +2842,7 @@ function addMember(data) {
         refId: transactionId
       });
     }
+    rebuildAccountingLedger_();
     SpreadsheetApp.flush();
     return { success: true, message: 'Anggota berhasil ditambahkan.', id: memberId };
   });
@@ -2723,6 +2954,7 @@ function processMemberExit(memberId, force) {
     getDb_().getSheetByName('Anggota')
       .getRange(memberFound.row, 1, 1, memberFound.values.length)
       .setValues([memberFound.values]);
+    rebuildAccountingLedger_();
     SpreadsheetApp.flush();
     return {
       success: true,
@@ -2826,6 +3058,7 @@ function addSavingTransaction(data) {
       source: 'Simpanan',
       refId: id
     });
+    rebuildAccountingLedger_();
     SpreadsheetApp.flush();
     return { success: true, message: 'Transaksi simpanan berhasil disimpan.', id: id };
   });
@@ -2906,6 +3139,7 @@ function updateSavingTransaction(data) {
       transactionType: data.transactionType,
       amount: amount
     });
+    rebuildAccountingLedger_();
     SpreadsheetApp.flush();
     return { success: true, message: 'Transaksi simpanan berhasil diperbarui.' };
   });
@@ -2933,6 +3167,7 @@ function deleteSavingTransaction(transactionId) {
     deleteCashEntriesByRef_('Simpanan', transactionId);
     if (isSystemPrincipal) setMemberPrincipalValue_(memberId, 0);
 
+    rebuildAccountingLedger_();
     SpreadsheetApp.flush();
     return { success: true, message: 'Transaksi simpanan berhasil dihapus.' };
   });
@@ -3050,6 +3285,7 @@ function addLoan(data) {
         refId: loanId
       });
     }
+    rebuildAccountingLedger_();
     SpreadsheetApp.flush();
     return {
       success: true,
@@ -3099,6 +3335,7 @@ function payInstallment(data) {
       date: date,
       amount: amount
     });
+    rebuildAccountingLedger_();
     SpreadsheetApp.flush();
     return {
       success: true,
@@ -3157,6 +3394,7 @@ function updateInstallment(data) {
       date: date,
       amount: newAmount
     });
+    rebuildAccountingLedger_();
     SpreadsheetApp.flush();
     return {
       success: true,
@@ -3190,6 +3428,7 @@ function deleteInstallment(installmentId) {
     deleteCashEntriesByRef_('Angsuran', installmentId);
     adjustLaterInstallmentBalances_(loanId, installmentNo, amount, true);
     setLoanRemaining_(loan, newRemaining);
+    rebuildAccountingLedger_();
     SpreadsheetApp.flush();
     return {
       success: true,
@@ -3304,7 +3543,7 @@ function getFinancialReport(filter) {
   var allCash = getObjects_('Kas').sort(function(a, b) {
     return parseDate_(a['Tanggal']) - parseDate_(b['Tanggal']);
   });
-  var openingBalance = allCash.filter(function(row) {
+  var openingBalance = getCashOpeningBalance_() + allCash.filter(function(row) {
     var date = parseDate_(row['Tanggal']);
     return date && date < period.start;
   }).reduce(function(total, row) {
@@ -3337,7 +3576,7 @@ function getFinancialReport(filter) {
 
   var allSavings = getObjects_('Simpanan');
   var savingsBalance = getSavingsSummary_(allSavings, getObjects_('Anggota'));
-  var currentCash = allCash.reduce(function(total, row) {
+  var currentCash = getCashOpeningBalance_() + allCash.reduce(function(total, row) {
     return total + number_(row['Masuk']) - number_(row['Keluar']);
   }, 0);
   var receivables = getObjects_('Pinjaman').reduce(function(total, row) {
@@ -3373,6 +3612,1407 @@ function getFinancialReport(filter) {
   };
 }
 
+function getChartOfAccounts(filters) {
+  ensureSetup();
+  filters = filters || {};
+  var query = String(filters.query || '').toLowerCase().trim();
+  var type = String(filters.type || 'Semua');
+  var items = getObjects_('COA').filter(function(row) {
+    if (type !== 'Semua' && row['Tipe Akun'] !== type) return false;
+    if (!query) return true;
+    return (
+      String(row['Kode Akun']) + ' ' +
+      String(row['Nama Akun']) + ' ' +
+      String(row['Kelompok Laporan'])
+    ).toLowerCase().indexOf(query) >= 0;
+  });
+  items.sort(function(a, b) {
+    return String(a['Kode Akun']).localeCompare(String(b['Kode Akun']), 'id', {
+      numeric: true
+    });
+  });
+  return { items: items, total: items.length };
+}
+
+function saveChartAccount(data) {
+  return withLock_(function() {
+    validateRequired_(data, [
+      'code', 'name', 'type', 'reportGroup', 'normalBalance', 'active'
+    ]);
+    var code = cleanText_(data.code, 30);
+    if (!/^[A-Za-z0-9.-]+$/.test(code)) {
+      throw new Error('Kode akun hanya boleh berisi huruf, angka, titik, atau tanda hubung.');
+    }
+    var allowedTypes = ['Aset', 'Liabilitas', 'Ekuitas', 'Pendapatan', 'Beban'];
+    if (allowedTypes.indexOf(data.type) === -1) throw new Error('Tipe akun tidak valid.');
+    if (['Debet', 'Kredit'].indexOf(data.normalBalance) === -1) {
+      throw new Error('Saldo normal akun tidak valid.');
+    }
+    var sheet = getDb_().getSheetByName('COA');
+    var found = findRowById_('COA', code);
+    var row = [
+      code,
+      cleanText_(data.name, 150),
+      data.type,
+      cleanText_(data.reportGroup, 150),
+      data.normalBalance,
+      positiveOrZero_(data.openingDebit, 'Saldo awal debet'),
+      positiveOrZero_(data.openingCredit, 'Saldo awal kredit'),
+      data.active === 'Tidak' ? 'Tidak' : 'Ya',
+      cleanText_(data.notes, 500)
+    ];
+    if (found) {
+      sheet.getRange(found.row, 1, 1, row.length).setValues([row]);
+    } else {
+      sheet.appendRow(row);
+    }
+    SpreadsheetApp.flush();
+    return { success: true, message: 'Chart of Accounts berhasil disimpan.' };
+  });
+}
+
+function deleteChartAccount(code) {
+  return withLock_(function() {
+    var found = findRowById_('COA', code);
+    if (!found) throw new Error('Akun tidak ditemukan.');
+    var used = getObjects_('Jurnal').some(function(row) {
+      return String(row['Kode Akun']) === String(code);
+    });
+    if (used) throw new Error('Akun sudah digunakan pada jurnal dan tidak dapat dihapus.');
+    getDb_().getSheetByName('COA').deleteRow(found.row);
+    return { success: true, message: 'Akun berhasil dihapus.' };
+  });
+}
+
+function getJournalEntries(filters) {
+  ensureSetup();
+  filters = filters || {};
+  var query = String(filters.query || '').toLowerCase().trim();
+  var source = String(filters.source || 'Semua');
+  var period = accountingPeriod_(filters);
+  var rows = getObjects_('Jurnal').filter(function(row) {
+    if (row['Status'] !== 'Posted') return false;
+    if (source !== 'Semua' && row['Sumber'] !== source) return false;
+    if (!isWithinPeriod_(row['Tanggal'], period)) return false;
+    if (!query) return true;
+    return (
+      row['ID Jurnal'] + ' ' + row['No Bukti'] + ' ' +
+      row['Keterangan'] + ' ' + row['Kode Akun'] + ' ' + row['Nama Akun']
+    ).toLowerCase().indexOf(query) >= 0;
+  });
+  rows.sort(function(a, b) {
+    var dateDiff = parseDate_(b['Tanggal']) - parseDate_(a['Tanggal']);
+    return dateDiff || String(b['ID Jurnal']).localeCompare(String(a['ID Jurnal']));
+  });
+  var cashRows = getObjects_('Kas').filter(function(row) {
+    return isWithinPeriod_(row['Tanggal'], period);
+  });
+  var totalCashIn = sum_(cashRows, 'Masuk');
+  var totalCashOut = sum_(cashRows, 'Keluar');
+  return {
+    items: rows,
+    total: rows.length,
+    totalEntries: Object.keys(rows.reduce(function(ids, row) {
+      ids[String(row['ID Jurnal'])] = true;
+      return ids;
+    }, {})).length,
+    totalDebit: sum_(rows, 'Debet'),
+    totalCredit: sum_(rows, 'Kredit'),
+    totalCashIn: totalCashIn,
+    totalCashOut: totalCashOut,
+    netCashFlow: totalCashIn - totalCashOut,
+    period: serializePeriod_(period)
+  };
+}
+
+function addManualJournal(data) {
+  return withLock_(function() {
+    validateRequired_(data, ['date', 'description', 'lines']);
+    var lines = Array.isArray(data.lines) ? data.lines : [];
+    if (lines.length < 2) throw new Error('Jurnal minimal memiliki dua baris akun.');
+    var entry = {
+      id: nextId_('Jurnal', 'JRN-', 7),
+      date: parseRequiredDate_(data.date, 'Tanggal jurnal'),
+      voucher: cleanText_(data.voucher, 80),
+      source: 'Manual',
+      refId: cleanText_(data.refId, 80),
+      description: cleanText_(data.description, 500),
+      officer: cleanText_(data.officer, 100) || DEFAULT_OFFICER,
+      lines: lines.map(function(line) {
+        return {
+          accountCode: cleanText_(line.accountCode, 30),
+          debit: positiveOrZero_(line.debit, 'Debet'),
+          credit: positiveOrZero_(line.credit, 'Kredit')
+        };
+      })
+    };
+    postJournalEntry_(entry);
+    SpreadsheetApp.flush();
+    return { success: true, message: 'Jurnal umum berhasil diposting.', id: entry.id };
+  });
+}
+
+function deleteManualJournal(journalId) {
+  return withLock_(function() {
+    var rows = getObjectsWithRows_('Jurnal').filter(function(item) {
+      return String(item.data['ID Jurnal']) === String(journalId);
+    });
+    if (!rows.length) throw new Error('Jurnal tidak ditemukan.');
+    if (rows.some(function(item) { return item.data['Sumber'] !== 'Manual'; })) {
+      throw new Error('Jurnal otomatis tidak dapat dihapus. Perbaiki transaksi sumbernya.');
+    }
+    var sheet = getDb_().getSheetByName('Jurnal');
+    rows.sort(function(a, b) { return b.row - a.row; })
+      .forEach(function(item) { sheet.deleteRow(item.row); });
+    return { success: true, message: 'Jurnal manual berhasil dihapus.' };
+  });
+}
+
+function syncAccountingLedger() {
+  return withLock_(function() {
+    return rebuildAccountingLedger_();
+  });
+}
+
+function rebuildAccountingLedger_() {
+  var sheet = getDb_().getSheetByName('Jurnal');
+  var manualRows = getObjects_('Jurnal').filter(function(row) {
+    return row['Sumber'] === 'Manual';
+  });
+  rebuildCashLedger_();
+  var journalRows = [];
+  var accounts = getCoaMap_();
+  function addEntry(entry) {
+    validateJournalEntry_(entry, accounts);
+    entry.lines.forEach(function(line) {
+      var account = accounts[line.accountCode];
+      journalRows.push([
+        entry.id,
+        parseDate_(entry.date) || new Date(),
+        entry.voucher || '',
+        entry.source,
+        entry.refId || '',
+        entry.description,
+        line.accountCode,
+        account['Nama Akun'],
+        number_(line.debit),
+        number_(line.credit),
+        entry.officer || DEFAULT_OFFICER,
+        'Posted'
+      ]);
+    });
+  }
+
+  var groups = {};
+  getObjects_('Kas').forEach(function(row) {
+    var incoming = number_(row['Masuk']);
+    var outgoing = number_(row['Keluar']);
+    var direction = incoming > 0 ? 'IN' : 'OUT';
+    var amount = incoming > 0 ? incoming : outgoing;
+    if (amount <= 0) return;
+    var refId = String(row['Ref ID'] || row['ID Kas']);
+    var source = String(row['Sumber Transaksi'] || 'Kas');
+    if (source === 'Manual') source = 'Kas Manual';
+    var key = [
+      formatDate_(row['Tanggal']), source, refId, direction
+    ].join('|');
+    if (!groups[key]) {
+      groups[key] = {
+        date: row['Tanggal'],
+        source: source,
+        refId: refId,
+        direction: direction,
+        descriptions: [],
+        cash: {},
+        counterpart: {}
+      };
+    }
+    var group = groups[key];
+    group.descriptions.push(row['Deskripsi']);
+    var cashCode = String(row['Kode Kas/Bank'] || cashAccountCode_());
+    var accountCode = String(
+      row['Kode Akun'] ||
+      cashCounterpartAccountCode_(
+        row['Kategori'],
+        row['Deskripsi'],
+        incoming,
+        outgoing
+      )
+    );
+    group.cash[cashCode] = number_(group.cash[cashCode]) + amount;
+    group.counterpart[accountCode] =
+      number_(group.counterpart[accountCode]) + amount;
+  });
+
+  Object.keys(groups).sort().forEach(function(key) {
+    var group = groups[key];
+    var lines = [];
+    Object.keys(group.cash).forEach(function(code) {
+      lines.push({
+        accountCode: code,
+        debit: group.direction === 'IN' ? group.cash[code] : 0,
+        credit: group.direction === 'OUT' ? group.cash[code] : 0
+      });
+    });
+    Object.keys(group.counterpart).forEach(function(code) {
+      lines.push({
+        accountCode: code,
+        debit: group.direction === 'OUT' ? group.counterpart[code] : 0,
+        credit: group.direction === 'IN' ? group.counterpart[code] : 0
+      });
+    });
+    addEntry({
+      id: systemJournalId_(
+        journalSourcePrefix_(group.source) + group.direction,
+        group.refId
+      ),
+      date: group.date,
+      voucher: group.refId,
+      source: group.source,
+      refId: group.refId,
+      description: cashGroupDescription_(group),
+      lines: lines
+    });
+  });
+
+  getObjects_('Aset Tetap').forEach(function(row) {
+    if (row['Status'] === 'Dihapus') return;
+    var cost = number_(row['Harga Perolehan']);
+    if (cost <= 0) return;
+    var residual = number_(row['Nilai Residu']);
+    var life = Math.max(1, number_(row['Umur Ekonomis Bulan']));
+    var acquisition = parseDate_(row['Tanggal Perolehan']);
+    var elapsed = acquisition ? monthsBetween_(acquisition, new Date()) : 0;
+    var calculatedAccumulated = Math.min(
+      Math.max(0, cost - residual),
+      Math.max(0, cost - residual) / life * Math.min(life, elapsed)
+    );
+    var accumulated = Math.max(
+      number_(row['Akumulasi Penyusutan']),
+      calculatedAccumulated
+    );
+    if (accumulated > 0) {
+      addEntry({
+        id: systemJournalId_('DEP', row['ID Aset']),
+        date: new Date(),
+        voucher: row['ID Aset'],
+        source: 'Penyusutan',
+        refId: row['ID Aset'],
+        description: 'Akumulasi penyusutan - ' + row['Nama Aset'],
+        lines: [
+          { accountCode: '7241', debit: accumulated, credit: 0 },
+          {
+            accountCode: depreciationAccountCode_(row['Kode Akun Aset']),
+            debit: 0,
+            credit: accumulated
+          }
+        ]
+      });
+    }
+  });
+
+  manualRows.forEach(function(row) {
+    journalRows.push([
+      row['ID Jurnal'], parseDate_(row['Tanggal']), row['No Bukti'],
+      row['Sumber'], row['Ref ID'], row['Keterangan'], row['Kode Akun'],
+      row['Nama Akun'], number_(row['Debet']), number_(row['Kredit']),
+      row['Petugas'], row['Status']
+    ]);
+  });
+  journalRows.sort(function(a, b) {
+    return a[1] - b[1] || String(a[0]).localeCompare(String(b[0]));
+  });
+  if (sheet.getLastRow() > 1) {
+    sheet.getRange(2, 1, sheet.getLastRow() - 1, SCHEMA.Jurnal.length)
+      .clearContent();
+  }
+  if (journalRows.length) {
+    sheet.getRange(2, 1, journalRows.length, SCHEMA.Jurnal.length)
+      .setValues(journalRows);
+  }
+  SpreadsheetApp.flush();
+  return {
+    success: true,
+    message: 'Jurnal akuntansi berhasil disinkronkan.',
+    rows: journalRows.length
+  };
+}
+
+function postJournalEntry_(entry) {
+  var accounts = getCoaMap_();
+  validateJournalEntry_(entry, accounts);
+  var rows = entry.lines.map(function(line) {
+    return [
+      entry.id,
+      entry.date,
+      entry.voucher || '',
+      entry.source || 'Manual',
+      entry.refId || '',
+      entry.description,
+      line.accountCode,
+      accounts[line.accountCode]['Nama Akun'],
+      number_(line.debit),
+      number_(line.credit),
+      entry.officer || DEFAULT_OFFICER,
+      'Posted'
+    ];
+  });
+  getDb_().getSheetByName('Jurnal')
+    .getRange(getDb_().getSheetByName('Jurnal').getLastRow() + 1, 1, rows.length, rows[0].length)
+    .setValues(rows);
+}
+
+function validateJournalEntry_(entry, accounts) {
+  if (!entry.lines || entry.lines.length < 2) {
+    throw new Error('Jurnal minimal memiliki dua baris akun.');
+  }
+  var debit = 0;
+  var credit = 0;
+  entry.lines.forEach(function(line) {
+    if (!accounts[line.accountCode]) {
+      throw new Error('Kode akun ' + line.accountCode + ' tidak ditemukan pada COA.');
+    }
+    if (accounts[line.accountCode]['Aktif'] === 'Tidak') {
+      throw new Error('Akun ' + line.accountCode + ' sudah tidak aktif.');
+    }
+    var lineDebit = number_(line.debit);
+    var lineCredit = number_(line.credit);
+    if (lineDebit < 0 || lineCredit < 0 || (lineDebit > 0 && lineCredit > 0)) {
+      throw new Error('Setiap baris jurnal hanya boleh memiliki debet atau kredit.');
+    }
+    if (lineDebit <= 0 && lineCredit <= 0) {
+      throw new Error('Nilai debet atau kredit wajib lebih dari 0.');
+    }
+    debit += lineDebit;
+    credit += lineCredit;
+  });
+  if (Math.abs(debit - credit) > 0.01) {
+    throw new Error(
+      'Jurnal tidak seimbang. Debet ' + formatRupiah_(debit) +
+      ' dan kredit ' + formatRupiah_(credit) + '.'
+    );
+  }
+}
+
+function getCashBankReport(filter) {
+  ensureSetup();
+  var period = accountingPeriod_(filter || {});
+  var cashAccounts = getObjects_('COA').filter(function(row) {
+    return row['Kelompok Laporan'] === 'Kas dan Setara Kas' && row['Aktif'] !== 'Tidak';
+  });
+  var allRows = getObjects_('Kas').sort(function(a, b) {
+    return parseDate_(a['Tanggal']) - parseDate_(b['Tanggal']);
+  });
+  var opening = getCashOpeningBalance_();
+  allRows.forEach(function(row) {
+    var date = parseDate_(row['Tanggal']);
+    if (date && date < period.start) {
+      opening += number_(row['Masuk']) - number_(row['Keluar']);
+    }
+  });
+  var running = opening;
+  var items = allRows.filter(function(row) {
+    return isWithinPeriod_(row['Tanggal'], period);
+  }).map(function(row) {
+    running += number_(row['Masuk']) - number_(row['Keluar']);
+    return {
+      id: row['ID Kas'],
+      date: row['Tanggal'],
+      voucher: row['Ref ID'] || row['ID Kas'],
+      accountCode: row['Kode Akun'],
+      accountName: row['Nama Akun'],
+      category: row['Kategori'],
+      description: row['Deskripsi'],
+      incoming: number_(row['Masuk']),
+      outgoing: number_(row['Keluar']),
+      balance: running,
+      cashCode: row['Kode Kas/Bank'],
+      paymentMethod: row['Pembayaran Via'],
+      source: row['Sumber Transaksi']
+    };
+  });
+  return {
+    period: serializePeriod_(period),
+    openingBalance: opening,
+    closingBalance: running,
+    totalIn: items.reduce(function(total, row) { return total + row.incoming; }, 0),
+    totalOut: items.reduce(function(total, row) { return total + row.outgoing; }, 0),
+    items: items,
+    accounts: cashAccounts
+  };
+}
+
+function getTrialBalance(filter) {
+  ensureSetup();
+  return buildTrialBalance_(accountingPeriod_(filter || {}));
+}
+
+function buildTrialBalance_(period) {
+  var accounts = getObjects_('COA').filter(function(row) {
+    return row['Aktif'] !== 'Tidak';
+  });
+  var journal = getObjects_('Jurnal').filter(function(row) {
+    return row['Status'] === 'Posted';
+  });
+  var items = accounts.map(function(account) {
+    var code = String(account['Kode Akun']);
+    var openingRaw = number_(account['Saldo Awal Debet']) -
+      number_(account['Saldo Awal Kredit']);
+    var debit = 0;
+    var credit = 0;
+    journal.forEach(function(row) {
+      if (String(row['Kode Akun']) !== code) return;
+      var date = parseDate_(row['Tanggal']);
+      if (!date) return;
+      if (date < period.start) {
+        openingRaw += number_(row['Debet']) - number_(row['Kredit']);
+      } else if (date <= period.end) {
+        debit += number_(row['Debet']);
+        credit += number_(row['Kredit']);
+      }
+    });
+    var endingRaw = openingRaw + debit - credit;
+    return {
+      code: code,
+      name: account['Nama Akun'],
+      type: account['Tipe Akun'],
+      reportGroup: account['Kelompok Laporan'],
+      normalBalance: account['Saldo Normal'],
+      openingDebit: Math.max(0, openingRaw),
+      openingCredit: Math.max(0, -openingRaw),
+      debit: debit,
+      credit: credit,
+      endingDebit: Math.max(0, endingRaw),
+      endingCredit: Math.max(0, -endingRaw),
+      rawBalance: endingRaw
+    };
+  }).filter(function(item) {
+    return item.openingDebit || item.openingCredit || item.debit ||
+      item.credit || item.endingDebit || item.endingCredit;
+  });
+  items.sort(function(a, b) {
+    return a.code.localeCompare(b.code, 'id', { numeric: true });
+  });
+  var totals = items.reduce(function(result, item) {
+    result.openingDebit += item.openingDebit;
+    result.openingCredit += item.openingCredit;
+    result.debit += item.debit;
+    result.credit += item.credit;
+    result.endingDebit += item.endingDebit;
+    result.endingCredit += item.endingCredit;
+    return result;
+  }, {
+    openingDebit: 0, openingCredit: 0, debit: 0, credit: 0,
+    endingDebit: 0, endingCredit: 0
+  });
+  totals.difference = totals.endingDebit - totals.endingCredit;
+  return {
+    period: serializePeriod_(period),
+    items: items,
+    totals: totals,
+    balanced: Math.abs(totals.difference) <= 0.01
+  };
+}
+
+function getBalanceSheet(filter) {
+  ensureSetup();
+  filter = filter || {};
+  var endDate = filter.endDate || Utilities.formatDate(new Date(), APP_TIMEZONE, 'yyyy-MM-dd');
+  var period = resolvePeriod_({
+    period: 'custom',
+    startDate: '1900-01-01',
+    endDate: endDate
+  });
+  var trial = buildTrialBalance_(period);
+  var assets = [];
+  var liabilities = [];
+  var equity = [];
+  trial.items.forEach(function(item) {
+    var amount;
+    if (item.type === 'Aset') {
+      amount = item.rawBalance;
+      if (Math.abs(amount) > 0.01) assets.push(statementLine_(item, amount));
+    } else if (item.type === 'Liabilitas') {
+      amount = -item.rawBalance;
+      if (Math.abs(amount) > 0.01) liabilities.push(statementLine_(item, amount));
+    } else if (item.type === 'Ekuitas') {
+      amount = -item.rawBalance;
+      if (Math.abs(amount) > 0.01) equity.push(statementLine_(item, amount));
+    }
+  });
+  var year = parseDate_(endDate).getFullYear();
+  var income = buildIncomeStatement_(resolvePeriod_({
+    period: 'custom',
+    startDate: year + '-01-01',
+    endDate: endDate
+  }));
+  if (Math.abs(income.netIncome) > 0.01) {
+    equity.push({
+      code: '3191',
+      name: 'SHU Tahun Berjalan',
+      group: 'SHU Tahun Berjalan',
+      amount: income.netIncome
+    });
+  }
+  var totalAssets = assets.reduce(function(total, row) { return total + row.amount; }, 0);
+  var totalLiabilities = liabilities.reduce(function(total, row) { return total + row.amount; }, 0);
+  var totalEquity = equity.reduce(function(total, row) { return total + row.amount; }, 0);
+  return {
+    asOf: formatDate_(endDate),
+    assets: groupStatementLines_(assets),
+    liabilities: groupStatementLines_(liabilities),
+    equity: groupStatementLines_(equity),
+    totals: {
+      assets: totalAssets,
+      liabilities: totalLiabilities,
+      equity: totalEquity,
+      liabilitiesAndEquity: totalLiabilities + totalEquity,
+      difference: totalAssets - totalLiabilities - totalEquity
+    },
+    balanced: Math.abs(totalAssets - totalLiabilities - totalEquity) <= 0.01
+  };
+}
+
+function getIncomeStatement(filter) {
+  ensureSetup();
+  return buildIncomeStatement_(accountingPeriod_(filter || {}));
+}
+
+function buildIncomeStatement_(period) {
+  var trial = buildTrialBalance_(period);
+  var revenues = [];
+  var expenses = [];
+  trial.items.forEach(function(item) {
+    var amount;
+    if (item.type === 'Pendapatan') {
+      amount = item.credit - item.debit;
+      if (Math.abs(amount) > 0.01) revenues.push(statementLine_(item, amount));
+    } else if (item.type === 'Beban') {
+      amount = item.debit - item.credit;
+      if (Math.abs(amount) > 0.01) expenses.push(statementLine_(item, amount));
+    }
+  });
+  var totalRevenue = revenues.reduce(function(total, row) { return total + row.amount; }, 0);
+  var totalExpense = expenses.reduce(function(total, row) { return total + row.amount; }, 0);
+  return {
+    period: serializePeriod_(period),
+    revenues: groupStatementLines_(revenues),
+    expenses: groupStatementLines_(expenses),
+    totalRevenue: totalRevenue,
+    totalExpense: totalExpense,
+    netIncome: totalRevenue - totalExpense
+  };
+}
+
+function getLoanDetailReport(filter) {
+  ensureSetup();
+  filter = filter || {};
+  var period = accountingPeriod_(filter);
+  var installments = getObjects_('Angsuran');
+  var items = getObjects_('Pinjaman').filter(function(row) {
+    if (filter.status && filter.status !== 'Semua' && row['Status'] !== filter.status) {
+      return false;
+    }
+    return !filter.startDate && !filter.endDate ||
+      isWithinPeriod_(row['Tanggal Pengajuan'], period);
+  }).map(function(row) {
+    var payments = installments.filter(function(item) {
+      return item['ID Pinjaman'] === row['ID Pinjaman'];
+    });
+    var paid = payments.reduce(function(total, item) {
+      return total + number_(item['Jumlah Bayar']);
+    }, 0);
+    return {
+      id: row['ID Pinjaman'],
+      date: row['Tanggal Pengajuan'],
+      memberId: row['ID Anggota'],
+      borrower: row['Nama Anggota'],
+      principal: number_(row['Pokok Pinjaman']),
+      tenor: number_(row['Tenor']),
+      percentage: number_(row['Persentase']),
+      appliedMargin: number_(row['Persentase Margin Dikenakan']),
+      marginAmount: Math.max(
+        0,
+        number_(row['Total Tagihan']) -
+          number_(row['Pokok Pinjaman']) -
+          number_(row['Biaya Admin'])
+      ),
+      adminFee: number_(row['Biaya Admin']),
+      totalBill: number_(row['Total Tagihan']),
+      paid: paid,
+      remaining: number_(row['Sisa Pinjaman']),
+      status: row['Status'],
+      installments: payments.length
+    };
+  });
+  items.sort(function(a, b) { return parseDate_(b.date) - parseDate_(a.date); });
+  return {
+    period: serializePeriod_(period),
+    items: items,
+    totals: {
+      principal: items.reduce(function(total, row) { return total + row.principal; }, 0),
+      margin: items.reduce(function(total, row) { return total + row.marginAmount; }, 0),
+      totalBill: items.reduce(function(total, row) { return total + row.totalBill; }, 0),
+      paid: items.reduce(function(total, row) { return total + row.paid; }, 0),
+      remaining: items.reduce(function(total, row) { return total + row.remaining; }, 0)
+    }
+  };
+}
+
+function getShuReport(filter) {
+  ensureSetup();
+  var income = buildIncomeStatement_(accountingPeriod_(filter || {}));
+  var settings = getSettingsInternal_();
+  var allocationDefinitions = [
+    ['Cadangan Koperasi', 'shu_cadangan'],
+    ['Jasa Anggota Berdasarkan Simpanan', 'shu_jasa_simpanan'],
+    ['Jasa Anggota Berdasarkan Pinjaman', 'shu_jasa_pinjaman'],
+    ['Bagian Pengurus', 'shu_pengurus'],
+    ['Bonus Pengelola Koperasi', 'shu_pengelola'],
+    ['Dana Pendidikan dan Partisipasi Anggota', 'shu_pendidikan'],
+    ['Dana Pembangunan Koperasi', 'shu_pembangunan'],
+    ['Dana Sosial', 'shu_sosial']
+  ];
+  var allocations = allocationDefinitions.map(function(item) {
+    var percentage = number_(settings[item[1]]);
+    return {
+      name: item[0],
+      key: item[1],
+      percentage: percentage,
+      amount: income.netIncome * percentage / 100
+    };
+  });
+  var totalPercentage = allocations.reduce(function(total, row) {
+    return total + row.percentage;
+  }, 0);
+  var totalAllocated = allocations.reduce(function(total, row) {
+    return total + row.amount;
+  }, 0);
+  return {
+    period: income.period,
+    netIncome: income.netIncome,
+    allocations: allocations,
+    totalPercentage: totalPercentage,
+    totalAllocated: totalAllocated,
+    remaining: income.netIncome - totalAllocated,
+    valid: Math.abs(totalPercentage - 100) <= 0.01
+  };
+}
+
+function getFixedAssets(filter) {
+  ensureSetup();
+  filter = filter || {};
+  var asOf = parseRequiredDate_(
+    filter.endDate || Utilities.formatDate(new Date(), APP_TIMEZONE, 'yyyy-MM-dd'),
+    'Tanggal laporan'
+  );
+  var items = getObjects_('Aset Tetap').map(function(row) {
+    var cost = number_(row['Harga Perolehan']);
+    var residual = number_(row['Nilai Residu']);
+    var life = Math.max(1, number_(row['Umur Ekonomis Bulan']));
+    var acquisition = parseDate_(row['Tanggal Perolehan']);
+    var elapsed = acquisition ? monthsBetween_(acquisition, asOf) : 0;
+    var monthly = Math.max(0, cost - residual) / life;
+    var calculatedAccumulated = Math.min(
+      Math.max(0, cost - residual),
+      monthly * Math.min(life, Math.max(0, elapsed))
+    );
+    var accumulated = Math.max(
+      number_(row['Akumulasi Penyusutan']),
+      calculatedAccumulated
+    );
+    return {
+      id: row['ID Aset'],
+      acquisitionDate: row['Tanggal Perolehan'],
+      accountCode: row['Kode Akun Aset'],
+      name: row['Nama Aset'],
+      quantity: number_(row['Jumlah']),
+      cost: cost,
+      residual: residual,
+      usefulLife: life,
+      method: row['Metode'],
+      monthlyDepreciation: monthly,
+      accumulatedDepreciation: accumulated,
+      bookValue: Math.max(residual, cost - accumulated),
+      status: row['Status'],
+      notes: row['Keterangan']
+    };
+  });
+  if (filter.status && filter.status !== 'Semua') {
+    items = items.filter(function(row) { return row.status === filter.status; });
+  }
+  return {
+    asOf: formatDate_(asOf),
+    items: items,
+    totals: {
+      cost: items.reduce(function(total, row) { return total + row.cost; }, 0),
+      accumulatedDepreciation: items.reduce(function(total, row) {
+        return total + row.accumulatedDepreciation;
+      }, 0),
+      bookValue: items.reduce(function(total, row) { return total + row.bookValue; }, 0)
+    }
+  };
+}
+
+function saveFixedAsset(data) {
+  return withLock_(function() {
+    validateRequired_(data, [
+      'acquisitionDate', 'accountCode', 'name', 'quantity', 'cost',
+      'residual', 'usefulLife', 'status'
+    ]);
+    var account = getCoaMap_()[String(data.accountCode)];
+    if (!account || account['Tipe Akun'] !== 'Aset') {
+      throw new Error('Kode akun aset tetap tidak valid.');
+    }
+    var cost = positive_(data.cost, 'Harga perolehan');
+    var residual = positiveOrZero_(data.residual, 'Nilai residu');
+    if (residual > cost) throw new Error('Nilai residu tidak boleh melebihi harga perolehan.');
+    var id = cleanText_(data.id, 50) || nextId_('Aset Tetap', 'AST-', 5);
+    var row = [
+      id,
+      parseRequiredDate_(data.acquisitionDate, 'Tanggal perolehan'),
+      String(data.accountCode),
+      cleanText_(data.name, 150),
+      positive_(data.quantity, 'Jumlah'),
+      cost,
+      residual,
+      Math.floor(positive_(data.usefulLife, 'Umur ekonomis')),
+      'Garis Lurus',
+      positiveOrZero_(data.accumulatedDepreciation, 'Akumulasi penyusutan'),
+      Math.max(0, cost - positiveOrZero_(
+        data.accumulatedDepreciation,
+        'Akumulasi penyusutan'
+      )),
+      data.status,
+      cleanText_(data.notes, 500)
+    ];
+    var found = findRowById_('Aset Tetap', id);
+    var sheet = getDb_().getSheetByName('Aset Tetap');
+    if (found) sheet.getRange(found.row, 1, 1, row.length).setValues([row]);
+    else sheet.appendRow(row);
+    rebuildAccountingLedger_();
+    return { success: true, message: 'Data aset tetap berhasil disimpan.', id: id };
+  });
+}
+
+function deleteFixedAsset(id) {
+  return withLock_(function() {
+    var found = findRowById_('Aset Tetap', id);
+    if (!found) throw new Error('Aset tetap tidak ditemukan.');
+    getDb_().getSheetByName('Aset Tetap').deleteRow(found.row);
+    rebuildAccountingLedger_();
+    return { success: true, message: 'Data aset tetap berhasil dihapus.' };
+  });
+}
+
+function getBenevolentFund(filter) {
+  ensureSetup();
+  filter = filter || {};
+  var period = accountingPeriod_(filter);
+  var items = getObjects_('Dana Kebajikan').filter(function(row) {
+    if (filter.type && filter.type !== 'Semua' && row['Tipe'] !== filter.type) {
+      return false;
+    }
+    return isWithinPeriod_(row['Tanggal'], period);
+  });
+  items.sort(sortByDateDesc_('Tanggal'));
+  var incoming = items.filter(function(row) { return row['Tipe'] === 'Penerimaan'; })
+    .reduce(function(total, row) { return total + number_(row['Jumlah']); }, 0);
+  var outgoing = items.filter(function(row) { return row['Tipe'] === 'Penyaluran'; })
+    .reduce(function(total, row) { return total + number_(row['Jumlah']); }, 0);
+  return {
+    period: serializePeriod_(period),
+    items: items,
+    totalIncoming: incoming,
+    totalOutgoing: outgoing,
+    balance: incoming - outgoing
+  };
+}
+
+function saveBenevolentFund(data) {
+  return withLock_(function() {
+    validateRequired_(data, [
+      'date', 'type', 'category', 'description', 'amount', 'paymentMethod'
+    ]);
+    if (['Penerimaan', 'Penyaluran'].indexOf(data.type) === -1) {
+      throw new Error('Tipe transaksi dana kebajikan tidak valid.');
+    }
+    var id = cleanText_(data.id, 50) ||
+      nextId_('Dana Kebajikan', 'DKB-', 6);
+    var row = [
+      id,
+      parseRequiredDate_(data.date, 'Tanggal transaksi'),
+      data.type,
+      cleanText_(data.category, 100),
+      cleanText_(data.description, 500),
+      cleanText_(data.party, 150),
+      positive_(data.amount, 'Jumlah'),
+      cleanText_(data.paymentMethod, 50),
+      cleanText_(data.refId, 80),
+      cleanText_(data.officer, 100) || DEFAULT_OFFICER
+    ];
+    var found = findRowById_('Dana Kebajikan', id);
+    var sheet = getDb_().getSheetByName('Dana Kebajikan');
+    if (found) sheet.getRange(found.row, 1, 1, row.length).setValues([row]);
+    else sheet.appendRow(row);
+    rebuildAccountingLedger_();
+    return { success: true, message: 'Transaksi dana kebajikan berhasil disimpan.', id: id };
+  });
+}
+
+function deleteBenevolentFund(id) {
+  return withLock_(function() {
+    var found = findRowById_('Dana Kebajikan', id);
+    if (!found) throw new Error('Transaksi dana kebajikan tidak ditemukan.');
+    getDb_().getSheetByName('Dana Kebajikan').deleteRow(found.row);
+    rebuildAccountingLedger_();
+    return { success: true, message: 'Transaksi dana kebajikan berhasil dihapus.' };
+  });
+}
+
+function getAdministrationDocuments(filters) {
+  ensureSetup();
+  filters = filters || {};
+  var query = String(filters.query || '').toLowerCase().trim();
+  var category = String(filters.category || 'Semua');
+  var items = getObjects_('Administrasi').filter(function(row) {
+    if (category !== 'Semua' && row['Kategori'] !== category) return false;
+    if (!query) return true;
+    return (
+      row['Nomor Dokumen'] + ' ' + row['Nama Dokumen'] + ' ' +
+      row['Kategori'] + ' ' + row['Status']
+    ).toLowerCase().indexOf(query) >= 0;
+  });
+  items.sort(sortByDateDesc_('Tanggal'));
+  return { items: items, total: items.length };
+}
+
+function saveAdministrationDocument(data) {
+  return withLock_(function() {
+    validateRequired_(data, [
+      'date', 'category', 'documentNumber', 'documentName', 'status'
+    ]);
+    if (data.link && !/^https?:\/\//i.test(String(data.link))) {
+      throw new Error('Link dokumen harus berupa URL http atau https.');
+    }
+    var id = cleanText_(data.id, 50) || nextId_('Administrasi', 'DOC-', 6);
+    var row = [
+      id,
+      parseRequiredDate_(data.date, 'Tanggal dokumen'),
+      cleanText_(data.category, 100),
+      cleanText_(data.documentNumber, 100),
+      cleanText_(data.documentName, 200),
+      cleanText_(data.link, 1000),
+      cleanText_(data.status, 50),
+      data.dueDate ? parseRequiredDate_(data.dueDate, 'Jatuh tempo') : '',
+      cleanText_(data.notes, 500)
+    ];
+    var found = findRowById_('Administrasi', id);
+    var sheet = getDb_().getSheetByName('Administrasi');
+    if (found) sheet.getRange(found.row, 1, 1, row.length).setValues([row]);
+    else sheet.appendRow(row);
+    return { success: true, message: 'Dokumen administrasi berhasil disimpan.', id: id };
+  });
+}
+
+function deleteAdministrationDocument(id) {
+  return withLock_(function() {
+    var found = findRowById_('Administrasi', id);
+    if (!found) throw new Error('Dokumen administrasi tidak ditemukan.');
+    getDb_().getSheetByName('Administrasi').deleteRow(found.row);
+    return { success: true, message: 'Dokumen administrasi berhasil dihapus.' };
+  });
+}
+
+function generateFinancialWorkbookExcel(filter) {
+  ensureSetup();
+  filter = filter || {};
+  var temp = SpreadsheetApp.create(
+    'Laporan ERP Koperasi MIKA ' +
+    Utilities.formatDate(new Date(), APP_TIMEZONE, 'yyyyMMdd_HHmmss')
+  );
+  try {
+    var coa = getChartOfAccounts({}).items;
+    var journal = getJournalEntries(filter);
+    var cash = getCashBankReport(filter);
+    var trial = getTrialBalance(filter);
+    var balance = getBalanceSheet(filter);
+    var income = getIncomeStatement(filter);
+    var loans = getLoanDetailReport(filter);
+    var shu = getShuReport(filter);
+    var assets = getFixedAssets({ endDate: filter.endDate });
+    var benevolent = getBenevolentFund(filter);
+
+    var first = temp.getSheets()[0].setName('COA');
+    writeExportSheet_(first, [
+      ['Kode Akun', 'Nama Akun', 'Tipe', 'Kelompok Laporan', 'Saldo Normal',
+        'Saldo Awal Debet', 'Saldo Awal Kredit', 'Aktif', 'Keterangan']
+    ].concat(coa.map(function(row) {
+      return [
+        row['Kode Akun'], row['Nama Akun'], row['Tipe Akun'],
+        row['Kelompok Laporan'], row['Saldo Normal'],
+        number_(row['Saldo Awal Debet']), number_(row['Saldo Awal Kredit']),
+        row['Aktif'], row['Keterangan']
+      ];
+    })));
+    writeExportSheet_(temp.insertSheet('Jurnal Umum'), [
+      ['Tanggal', 'ID Jurnal', 'No Bukti', 'Sumber', 'Keterangan',
+        'Kode Akun', 'Nama Akun', 'Debet', 'Kredit']
+    ].concat(journal.items.map(function(row) {
+      return [
+        formatDisplayDate_(row['Tanggal']), row['ID Jurnal'], row['No Bukti'],
+        row['Sumber'], row['Keterangan'], row['Kode Akun'], row['Nama Akun'],
+        number_(row['Debet']), number_(row['Kredit'])
+      ];
+    })));
+    writeExportSheet_(temp.insertSheet('Rincian Kas Bank'), [
+      ['Tanggal', 'No Bukti', 'COA', 'Akun', 'Transaksi',
+        'Masuk', 'Keluar', 'Saldo', 'Pembayaran Via']
+    ].concat(cash.items.map(function(row) {
+      return [
+        formatDisplayDate_(row.date), row.voucher, row.accountCode,
+        row.accountName, row.description, row.incoming, row.outgoing,
+        row.balance, row.cashCode + ' - ' + row.paymentMethod
+      ];
+    })));
+    writeExportSheet_(temp.insertSheet('Trial Balance'), [
+      ['Kode', 'Nama Akun', 'Saldo Awal Debet', 'Saldo Awal Kredit',
+        'Mutasi Debet', 'Mutasi Kredit', 'Saldo Akhir Debet', 'Saldo Akhir Kredit']
+    ].concat(trial.items.map(function(row) {
+      return [
+        row.code, row.name, row.openingDebit, row.openingCredit,
+        row.debit, row.credit, row.endingDebit, row.endingCredit
+      ];
+    })).concat([[
+      '', 'TOTAL', trial.totals.openingDebit, trial.totals.openingCredit,
+      trial.totals.debit, trial.totals.credit,
+      trial.totals.endingDebit, trial.totals.endingCredit
+    ]]));
+    writeExportSheet_(temp.insertSheet('Neraca'), balanceSheetExportRows_(balance));
+    writeExportSheet_(temp.insertSheet('Laba Rugi'), incomeStatementExportRows_(income));
+    writeExportSheet_(temp.insertSheet('Rincian Pinjaman'), [
+      ['ID', 'Tanggal', 'Peminjam', 'Pokok', 'Margin', 'Biaya Admin',
+        'Total Tagihan', 'Sudah Dibayar', 'Sisa', 'Status']
+    ].concat(loans.items.map(function(row) {
+      return [
+        row.id, formatDisplayDate_(row.date), row.borrower, row.principal,
+        row.marginAmount, row.adminFee, row.totalBill, row.paid,
+        row.remaining, row.status
+      ];
+    })));
+    writeExportSheet_(temp.insertSheet('Pembagian SHU'), [
+      ['Laba Tahun Berjalan', shu.netIncome],
+      ['Komponen', 'Persentase', 'Jumlah']
+    ].concat(shu.allocations.map(function(row) {
+      return [row.name, row.percentage / 100, row.amount];
+    })).concat([
+      ['TOTAL', shu.totalPercentage / 100, shu.totalAllocated],
+      ['SISA', '', shu.remaining]
+    ]));
+    writeExportSheet_(temp.insertSheet('Aset Tetap'), [
+      ['ID', 'Tanggal Perolehan', 'Nama Aset', 'Kode Akun', 'Harga Perolehan',
+        'Umur Bulan', 'Penyusutan Bulanan', 'Akumulasi Penyusutan', 'Nilai Buku']
+    ].concat(assets.items.map(function(row) {
+      return [
+        row.id, formatDisplayDate_(row.acquisitionDate), row.name,
+        row.accountCode, row.cost, row.usefulLife, row.monthlyDepreciation,
+        row.accumulatedDepreciation, row.bookValue
+      ];
+    })));
+    writeExportSheet_(temp.insertSheet('Dana Kebajikan'), [
+      ['Tanggal', 'ID', 'Tipe', 'Kategori', 'Deskripsi', 'Pihak', 'Jumlah']
+    ].concat(benevolent.items.map(function(row) {
+      return [
+        formatDisplayDate_(row['Tanggal']), row['ID Transaksi'], row['Tipe'],
+        row['Kategori'], row['Deskripsi'], row['Pihak'], number_(row['Jumlah'])
+      ];
+    })));
+    var documents = getAdministrationDocuments({}).items;
+    writeExportSheet_(temp.insertSheet('Administrasi'), [
+      ['Tanggal', 'ID', 'Kategori', 'Nomor Dokumen', 'Nama Dokumen',
+        'Status', 'Jatuh Tempo', 'Link Drive', 'Keterangan']
+    ].concat(documents.map(function(row) {
+      return [
+        formatDisplayDate_(row['Tanggal']), row['ID Dokumen'], row['Kategori'],
+        row['Nomor Dokumen'], row['Nama Dokumen'], row['Status'],
+        formatDisplayDate_(row['Jatuh Tempo']), row['Link Drive'],
+        row['Keterangan']
+      ];
+    })));
+
+    SpreadsheetApp.flush();
+    var url = 'https://docs.google.com/spreadsheets/d/' + temp.getId() +
+      '/export?format=xlsx';
+    var response = UrlFetchApp.fetch(url, {
+      headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() },
+      muteHttpExceptions: true
+    });
+    if (response.getResponseCode() !== 200) {
+      throw new Error('Ekspor Excel gagal dengan kode ' + response.getResponseCode() + '.');
+    }
+    var blob = response.getBlob().setName(
+      'Laporan-Keuangan-Koperasi-MIKA-' +
+      Utilities.formatDate(new Date(), APP_TIMEZONE, 'yyyyMMdd') + '.xlsx'
+    );
+    return {
+      fileName: blob.getName(),
+      mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      base64: Utilities.base64Encode(blob.getBytes())
+    };
+  } finally {
+    try {
+      DriveApp.getFileById(temp.getId()).setTrashed(true);
+    } catch (error) {
+      // File sementara akan tetap dapat dibersihkan manual jika izin Drive terbatas.
+    }
+  }
+}
+
+function generateAccountingReportPdf(reportType, filter) {
+  ensureSetup();
+  var payload = accountingPdfPayload_(String(reportType || ''), filter || {});
+  var stamp = Utilities.formatDate(new Date(), APP_TIMEZONE, 'yyyyMMdd');
+  return buildAccountingReportPdf_(
+    payload,
+    getSettingsInternal_(),
+    payload.filePrefix + '-' + stamp + '.pdf'
+  );
+}
+
+function accountingPdfPayload_(reportType, filter) {
+  var payload = {
+    title: '',
+    subtitle: '',
+    headers: [],
+    rows: [],
+    summary: [],
+    filePrefix: 'Laporan-Koperasi-MIKA'
+  };
+  if (reportType === 'coa') {
+    var coa = getChartOfAccounts({}).items;
+    payload.title = 'CHART OF ACCOUNTS';
+    payload.subtitle = 'Daftar akun Koperasi Syariah MIKA';
+    payload.headers = ['Kode', 'Nama Akun', 'Tipe', 'Kelompok', 'Saldo Normal'];
+    payload.rows = coa.map(function(row) {
+      return [
+        row['Kode Akun'], row['Nama Akun'], row['Tipe Akun'],
+        row['Kelompok Laporan'], row['Saldo Normal']
+      ];
+    });
+    payload.filePrefix = 'Chart-of-Accounts';
+    return payload;
+  }
+  if (reportType === 'journal') {
+    var journal = getJournalEntries(filter);
+    payload.title = 'JURNAL UMUM';
+    payload.subtitle = pdfPeriodText_(journal.period);
+    payload.headers = ['Tanggal', 'Ref', 'Kode', 'Nama Akun', 'Debet', 'Kredit'];
+    payload.rows = journal.items.map(function(row) {
+      return [
+        formatDisplayDate_(row['Tanggal']), row['No Bukti'],
+        row['Kode Akun'], row['Nama Akun'],
+        row['Debet'] ? formatRupiah_(row['Debet']) : '-',
+        row['Kredit'] ? formatRupiah_(row['Kredit']) : '-'
+      ];
+    });
+    payload.summary = [
+      ['Uang Masuk', formatRupiah_(journal.totalCashIn)],
+      ['Uang Keluar', formatRupiah_(journal.totalCashOut)],
+      ['Status Jurnal',
+        Math.abs(journal.totalDebit - journal.totalCredit) <= 0.01
+          ? 'Debet = Kredit'
+          : 'Tidak seimbang']
+    ];
+    payload.filePrefix = 'Jurnal-Umum';
+    return payload;
+  }
+  if (reportType === 'cashbank') {
+    var cash = getCashBankReport(filter);
+    payload.title = 'RINCIAN KAS DAN BANK';
+    payload.subtitle = pdfPeriodText_(cash.period);
+    payload.headers = [
+      'Tanggal', 'Ref', 'COA', 'Akun', 'Transaksi',
+      'Masuk', 'Keluar', 'Saldo', 'Via'
+    ];
+    payload.rows = cash.items.map(function(row) {
+      return [
+        formatDisplayDate_(row.date), row.voucher, row.accountCode,
+        row.accountName, row.description,
+        row.incoming ? formatRupiah_(row.incoming) : '-',
+        row.outgoing ? formatRupiah_(row.outgoing) : '-',
+        formatRupiah_(row.balance),
+        row.cashCode + ' ' + row.paymentMethod
+      ];
+    });
+    payload.summary = [
+      ['Saldo Awal', formatRupiah_(cash.openingBalance)],
+      ['Uang Masuk', formatRupiah_(cash.totalIn)],
+      ['Uang Keluar', formatRupiah_(cash.totalOut)],
+      ['Saldo Akhir', formatRupiah_(cash.closingBalance)]
+    ];
+    payload.filePrefix = 'Rincian-Kas-Bank';
+    return payload;
+  }
+  if (reportType === 'trial') {
+    var trial = getTrialBalance(filter);
+    payload.title = 'TRIAL BALANCE';
+    payload.subtitle = pdfPeriodText_(trial.period);
+    payload.headers = [
+      'Kode', 'Nama Akun', 'Awal D', 'Awal K',
+      'Mutasi D', 'Mutasi K', 'Akhir D', 'Akhir K'
+    ];
+    payload.rows = trial.items.map(function(row) {
+      return [
+        row.code, row.name, formatRupiah_(row.openingDebit),
+        formatRupiah_(row.openingCredit), formatRupiah_(row.debit),
+        formatRupiah_(row.credit), formatRupiah_(row.endingDebit),
+        formatRupiah_(row.endingCredit)
+      ];
+    });
+    payload.summary = [
+      ['Status', trial.balanced ? 'Seimbang' : 'Tidak seimbang'],
+      ['Selisih', formatRupiah_(trial.totals.difference)]
+    ];
+    payload.filePrefix = 'Trial-Balance';
+    return payload;
+  }
+  if (reportType === 'balance') {
+    var balance = getBalanceSheet(filter);
+    payload.title = 'NERACA';
+    payload.subtitle = 'Posisi per ' + formatDisplayDate_(balance.asOf);
+    payload.headers = ['Bagian', 'Kode', 'Nama Akun', 'Jumlah'];
+    ['assets', 'liabilities', 'equity'].forEach(function(section) {
+      var label = {
+        assets: 'AKTIVA', liabilities: 'LIABILITAS', equity: 'EKUITAS'
+      }[section];
+      balance[section].forEach(function(group) {
+        group.items.forEach(function(item) {
+          payload.rows.push([
+            label + ' / ' + group.name, item.code, item.name,
+            formatRupiah_(item.amount)
+          ]);
+        });
+      });
+    });
+    payload.summary = [
+      ['Total Aktiva', formatRupiah_(balance.totals.assets)],
+      ['Total Liabilitas dan Ekuitas',
+        formatRupiah_(balance.totals.liabilitiesAndEquity)],
+      ['Selisih', formatRupiah_(balance.totals.difference)]
+    ];
+    payload.filePrefix = 'Neraca';
+    return payload;
+  }
+  if (reportType === 'income') {
+    var income = getIncomeStatement(filter);
+    payload.title = 'LAPORAN LABA RUGI';
+    payload.subtitle = pdfPeriodText_(income.period);
+    payload.headers = ['Bagian', 'Kode', 'Nama Akun', 'Jumlah'];
+    income.revenues.forEach(function(group) {
+      group.items.forEach(function(item) {
+        payload.rows.push([
+          'PENDAPATAN / ' + group.name, item.code, item.name,
+          formatRupiah_(item.amount)
+        ]);
+      });
+    });
+    income.expenses.forEach(function(group) {
+      group.items.forEach(function(item) {
+        payload.rows.push([
+          'BEBAN / ' + group.name, item.code, item.name,
+          formatRupiah_(item.amount)
+        ]);
+      });
+    });
+    payload.summary = [
+      ['Total Pendapatan', formatRupiah_(income.totalRevenue)],
+      ['Total Beban', formatRupiah_(income.totalExpense)],
+      ['SHU / Laba Bersih', formatRupiah_(income.netIncome)]
+    ];
+    payload.filePrefix = 'Laba-Rugi';
+    return payload;
+  }
+  if (reportType === 'loanreport') {
+    var loans = getLoanDetailReport(filter);
+    payload.title = 'RINCIAN PINJAMAN';
+    payload.subtitle = pdfPeriodText_(loans.period);
+    payload.headers = [
+      'ID', 'Tanggal', 'Peminjam', 'Pokok', 'Margin',
+      'Dibayar', 'Sisa', 'Status'
+    ];
+    payload.rows = loans.items.map(function(row) {
+      return [
+        row.id, formatDisplayDate_(row.date), row.borrower,
+        formatRupiah_(row.principal), formatRupiah_(row.marginAmount),
+        formatRupiah_(row.paid), formatRupiah_(row.remaining), row.status
+      ];
+    });
+    payload.summary = [
+      ['Total Pokok', formatRupiah_(loans.totals.principal)],
+      ['Total Margin', formatRupiah_(loans.totals.margin)],
+      ['Sisa Piutang', formatRupiah_(loans.totals.remaining)]
+    ];
+    payload.filePrefix = 'Rincian-Pinjaman';
+    return payload;
+  }
+  if (reportType === 'shu') {
+    var shu = getShuReport(filter);
+    payload.title = 'LAPORAN PEMBAGIAN SHU';
+    payload.subtitle = pdfPeriodText_(shu.period);
+    payload.headers = ['Komponen', 'Persentase', 'Jumlah'];
+    payload.rows = shu.allocations.map(function(row) {
+      return [
+        row.name, roundPercentage_(row.percentage) + '%',
+        formatRupiah_(row.amount)
+      ];
+    });
+    payload.summary = [
+      ['SHU Tahun Berjalan', formatRupiah_(shu.netIncome)],
+      ['Total Dialokasikan', formatRupiah_(shu.totalAllocated)],
+      ['Sisa', formatRupiah_(shu.remaining)]
+    ];
+    payload.filePrefix = 'Pembagian-SHU';
+    return payload;
+  }
+  if (reportType === 'assets') {
+    var assets = getFixedAssets({ endDate: filter.endDate });
+    payload.title = 'REGISTER ASET TETAP';
+    payload.subtitle = 'Posisi per ' + formatDisplayDate_(assets.asOf);
+    payload.headers = [
+      'ID', 'Tanggal', 'Nama Aset', 'Harga', 'Akumulasi', 'Nilai Buku'
+    ];
+    payload.rows = assets.items.map(function(row) {
+      return [
+        row.id, formatDisplayDate_(row.acquisitionDate), row.name,
+        formatRupiah_(row.cost), formatRupiah_(row.accumulatedDepreciation),
+        formatRupiah_(row.bookValue)
+      ];
+    });
+    payload.summary = [
+      ['Harga Perolehan', formatRupiah_(assets.totals.cost)],
+      ['Akumulasi Penyusutan',
+        formatRupiah_(assets.totals.accumulatedDepreciation)],
+      ['Nilai Buku', formatRupiah_(assets.totals.bookValue)]
+    ];
+    payload.filePrefix = 'Aset-Tetap';
+    return payload;
+  }
+  if (reportType === 'benevolent') {
+    var benevolent = getBenevolentFund(filter);
+    payload.title = 'DANA KEBAJIKAN';
+    payload.subtitle = pdfPeriodText_(benevolent.period);
+    payload.headers = [
+      'Tanggal', 'ID', 'Tipe', 'Kategori', 'Deskripsi', 'Jumlah'
+    ];
+    payload.rows = benevolent.items.map(function(row) {
+      return [
+        formatDisplayDate_(row['Tanggal']), row['ID Transaksi'], row['Tipe'],
+        row['Kategori'], row['Deskripsi'], formatRupiah_(row['Jumlah'])
+      ];
+    });
+    payload.summary = [
+      ['Penerimaan', formatRupiah_(benevolent.totalIncoming)],
+      ['Penyaluran', formatRupiah_(benevolent.totalOutgoing)],
+      ['Saldo', formatRupiah_(benevolent.balance)]
+    ];
+    payload.filePrefix = 'Dana-Kebajikan';
+    return payload;
+  }
+  throw new Error('Jenis laporan PDF tidak dikenali.');
+}
+
+function pdfPeriodText_(period) {
+  return 'Periode ' + formatDisplayDate_(period.start) + ' - ' +
+    formatDisplayDate_(period.end);
+}
+
+function buildAccountingReportPdf_(payload, settings, fileName) {
+  var document = DocumentApp.create('TEMP_' + fileName);
+  var file = DriveApp.getFileById(document.getId());
+  try {
+    var body = document.getBody();
+    body.clear();
+    body.setPageWidth(842);
+    body.setPageHeight(595);
+    body.setMarginTop(24);
+    body.setMarginBottom(24);
+    body.setMarginLeft(24);
+    body.setMarginRight(24);
+    var logoBlob = getLogoBlob_(settings.logo_url);
+    if (logoBlob) {
+      var logoParagraph = body.appendParagraph('');
+      logoParagraph.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+      resizeInlineImage_(logoParagraph.appendInlineImage(logoBlob), 42, 42);
+    }
+    appendCenteredParagraph_(
+      body,
+      settings.nama_koperasi || 'Koperasi Syariah MIKA',
+      13,
+      true,
+      '#123B73'
+    );
+    appendCenteredParagraph_(body, payload.title, 11, true, '#172033');
+    appendCenteredParagraph_(body, payload.subtitle, 8, false, '#596579')
+      .setSpacingAfter(8);
+    if (payload.summary.length) {
+      var summaryText = payload.summary.map(function(item) {
+        return item[0] + ': ' + item[1];
+      }).join('  |  ');
+      var summaryParagraph = body.appendParagraph(summaryText);
+      summaryParagraph.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+      summaryParagraph.setAttributes({
+        FONT_SIZE: 8,
+        BOLD: true,
+        FOREGROUND_COLOR: '#123B73'
+      });
+      summaryParagraph.setSpacingAfter(8);
+    }
+    var emptyPdfRow = payload.headers.map(function(header, index) {
+      return index === 0 ? 'Tidak ada data' : '';
+    });
+    var rows = [payload.headers].concat(
+      payload.rows.length ? payload.rows : [emptyPdfRow]
+    );
+    var table = body.appendTable(rows.map(function(row) {
+      return row.map(function(value) {
+        return String(value === undefined || value === null ? '' : value);
+      });
+    }));
+    table.setBorderColor('#CBD5E1');
+    table.setBorderWidth(0.5);
+    for (var rowIndex = 0; rowIndex < table.getNumRows(); rowIndex++) {
+      var tableRow = table.getRow(rowIndex);
+      for (var cellIndex = 0; cellIndex < tableRow.getNumCells(); cellIndex++) {
+        var cell = tableRow.getCell(cellIndex);
+        if (rowIndex === 0) cell.setBackgroundColor('#123B73');
+        var paragraph = cell.getChild(0).asParagraph();
+        paragraph.setSpacingBefore(0);
+        paragraph.setSpacingAfter(0);
+        paragraph.setAttributes({
+          FONT_SIZE: payload.headers.length > 7 ? 6 : 7,
+          BOLD: rowIndex === 0,
+          FOREGROUND_COLOR: rowIndex === 0 ? '#FFFFFF' : '#172033'
+        });
+      }
+    }
+    document.saveAndClose();
+    Utilities.sleep(500);
+    var pdf = file.getAs(MimeType.PDF).setName(fileName);
+    return {
+      fileName: fileName,
+      mimeType: 'application/pdf',
+      base64: Utilities.base64Encode(pdf.getBytes())
+    };
+  } finally {
+    try {
+      document.saveAndClose();
+    } catch (closeError) {
+      console.warn('Dokumen laporan sudah ditutup: ' + closeError.message);
+    }
+    file.setTrashed(true);
+  }
+}
+
 function getSettings() {
   ensureSetup();
   return getSettingsInternal_();
@@ -3383,7 +5023,12 @@ function getSettingsInternal_() {
   getObjects_('Pengaturan').forEach(function(row) {
     result[row['Key']] = row['Value'];
   });
-  ['simpanan_pokok', 'simpanan_wajib', 'margin_pinjaman', 'biaya_admin'].forEach(function(key) {
+  [
+    'simpanan_pokok', 'simpanan_wajib', 'margin_pinjaman', 'biaya_admin',
+    'shu_cadangan', 'shu_jasa_simpanan', 'shu_jasa_pinjaman',
+    'shu_pengurus', 'shu_pengelola', 'shu_pendidikan',
+    'shu_pembangunan', 'shu_sosial'
+  ].forEach(function(key) {
     result[key] = number_(result[key]);
   });
   return result;
@@ -3397,9 +5042,37 @@ function saveSettings(data) {
     }
     var allowed = {};
     DEFAULT_SETTINGS.forEach(function(row) { allowed[row[0]] = row[2]; });
-    var numericKeys = ['simpanan_pokok', 'simpanan_wajib', 'margin_pinjaman', 'biaya_admin'];
+    var numericKeys = [
+      'simpanan_pokok', 'simpanan_wajib', 'margin_pinjaman', 'biaya_admin',
+      'shu_cadangan', 'shu_jasa_simpanan', 'shu_jasa_pinjaman',
+      'shu_pengurus', 'shu_pengelola', 'shu_pendidikan',
+      'shu_pembangunan', 'shu_sosial'
+    ];
     numericKeys.forEach(function(key) {
       data[key] = positiveOrZero_(data[key], allowed[key] || key);
+    });
+    var shuTotal = [
+      'shu_cadangan', 'shu_jasa_simpanan', 'shu_jasa_pinjaman',
+      'shu_pengurus', 'shu_pengelola', 'shu_pendidikan',
+      'shu_pembangunan', 'shu_sosial'
+    ].reduce(function(total, key) {
+      return total + number_(data[key]);
+    }, 0);
+    if (Math.abs(shuTotal - 100) > 0.01) {
+      throw new Error(
+        'Total persentase pembagian SHU harus 100%. Saat ini ' +
+        roundPercentage_(shuTotal) + '%.'
+      );
+    }
+    var coa = getCoaMap_();
+    ['akun_kas_default', 'akun_bank_default'].forEach(function(key) {
+      var code = cleanText_(data[key], 30);
+      if (!coa[code] || coa[code]['Kelompok Laporan'] !== 'Kas dan Setara Kas') {
+        throw new Error(
+          (key === 'akun_kas_default' ? 'Akun kas' : 'Akun bank') +
+          ' harus menggunakan kode COA kelompok Kas dan Setara Kas.'
+        );
+      }
     });
 
     var sheet = getDb_().getSheetByName('Pengaturan');
@@ -3421,7 +5094,9 @@ function saveSettings(data) {
 
 function syncCashLedger() {
   return withLock_(function() {
-    return rebuildCashLedger_();
+    var result = rebuildAccountingLedger_();
+    result.message = 'Rincian Kas dan Jurnal berhasil disinkronkan.';
+    return result;
   });
 }
 
@@ -3433,18 +5108,82 @@ function rebuildCashLedger_() {
       row['Sumber Transaksi'] === 'Anggota Keluar';
   });
   var entries = [];
+  var accounts = getCoaMap_();
+  var defaultCashCode = cashAccountCode_();
+  var openingBalance = getCashOpeningBalance_();
   function add(data) {
-    entries.push([
-      '', parseDate_(data.date) || new Date(), data.category, data.description,
-      number_(data.incoming), number_(data.outgoing), data.source, data.refId
-    ]);
+    var accountCode = String(
+      data.accountCode ||
+      cashCounterpartAccountCode_(
+        data.category,
+        data.description,
+        data.incoming,
+        data.outgoing
+      )
+    );
+    var cashCode = String(data.cashCode || defaultCashCode);
+    entries.push({
+      date: parseDate_(data.date) || new Date(),
+      accountCode: accountCode,
+      accountName: accounts[accountCode]
+        ? accounts[accountCode]['Nama Akun']
+        : cleanText_(data.accountName, 150),
+      category: data.category,
+      description: data.description,
+      incoming: number_(data.incoming),
+      outgoing: number_(data.outgoing),
+      cashCode: cashCode,
+      paymentMethod: accounts[cashCode]
+        ? accounts[cashCode]['Nama Akun']
+        : cleanText_(data.paymentMethod, 150) || 'Kas/Bank',
+      source: data.source,
+      refId: data.refId
+    });
   }
 
-  getObjects_('Simpanan').forEach(function(row) {
+  var savingRows = getObjects_('Simpanan');
+  getObjects_('Anggota').forEach(function(member) {
+    if (member['Status'] === 'Keluar') return;
+    var baseline = Math.max(0, number_(member['Simpanan Pokok']));
+    if (baseline <= 0) return;
+    var represented = 0;
+    savingRows.forEach(function(row) {
+      if (String(row['ID Anggota']) !== String(member['ID Anggota']) ||
+          row['Jenis Simpanan'] !== 'Simpanan Pokok' ||
+          row['Tipe Transaksi'] !== 'Setor Tunai') {
+        return;
+      }
+      var sameJoinDate = formatDate_(row['Tanggal']) ===
+        formatDate_(member['Tanggal Gabung']);
+      if (/simpanan pokok anggota baru|saldo awal simpanan pokok/i.test(
+          String(row['Keterangan'] || '')
+        ) || sameJoinDate) {
+        represented += Math.min(
+          Math.max(0, baseline - represented),
+          number_(row['Jumlah'])
+        );
+      }
+    });
+    var unrepresented = Math.max(0, baseline - represented);
+    if (unrepresented <= 0) return;
+    add({
+      date: member['Tanggal Gabung'],
+      accountCode: '3111',
+      category: 'Simpanan Masuk',
+      description: 'Saldo awal Simpanan Pokok - ' + member['Nama Lengkap'],
+      incoming: unrepresented,
+      outgoing: 0,
+      source: 'Saldo Awal',
+      refId: member['ID Anggota']
+    });
+  });
+
+  savingRows.forEach(function(row) {
     if (/penutupan saldo karena anggota keluar/i.test(String(row['Keterangan'] || ''))) return;
     var amount = number_(row['Jumlah']);
     add({
       date: row['Tanggal'],
+      accountCode: savingAccountCode_(row['Jenis Simpanan']),
       category: row['Tipe Transaksi'] === 'Setor Tunai' ? 'Simpanan Masuk' : 'Penarikan Simpanan',
       description: row['Jenis Simpanan'] + ' - ' + row['Nama Anggota'],
       incoming: row['Tipe Transaksi'] === 'Setor Tunai' ? amount : 0,
@@ -3456,6 +5195,7 @@ function rebuildCashLedger_() {
   getObjects_('Pinjaman').forEach(function(row) {
     add({
       date: row['Tanggal Pengajuan'],
+      accountCode: '1132',
       category: 'Pencairan Pinjaman',
       description: 'Pencairan pembiayaan - ' + row['Nama Anggota'],
       incoming: 0,
@@ -3466,6 +5206,7 @@ function rebuildCashLedger_() {
     if (number_(row['Biaya Admin']) > 0) {
       add({
         date: row['Tanggal Pengajuan'],
+        accountCode: '4121',
         category: 'Biaya Admin',
         description: 'Biaya admin pembiayaan - ' + row['Nama Anggota'],
         incoming: number_(row['Biaya Admin']),
@@ -3485,6 +5226,7 @@ function rebuildCashLedger_() {
     var marginPart = totalBill > 0 ? number_(row['Jumlah Bayar']) * marginNominal / totalBill : 0;
     add({
       date: row['Tanggal Bayar'],
+      accountCode: '1132',
       category: 'Pembayaran Angsuran',
       description: 'Angsuran pokok #' + row['Angsuran Ke'] + ' - ' + row['Nama Anggota'],
       incoming: Math.max(0, number_(row['Jumlah Bayar']) - marginPart),
@@ -3495,6 +5237,7 @@ function rebuildCashLedger_() {
     if (marginPart > 0) {
       add({
         date: row['Tanggal Bayar'],
+        accountCode: '4111',
         category: 'Pendapatan Margin',
         description: 'Margin angsuran #' + row['Angsuran Ke'] + ' - ' + row['Nama Anggota'],
         incoming: marginPart,
@@ -3504,30 +5247,89 @@ function rebuildCashLedger_() {
       });
     }
   });
+  getObjects_('Dana Kebajikan').forEach(function(row) {
+    var incoming = row['Tipe'] === 'Penerimaan';
+    add({
+      date: row['Tanggal'],
+      accountCode: '2161',
+      category: 'Dana Kebajikan',
+      description: row['Deskripsi'],
+      incoming: incoming ? number_(row['Jumlah']) : 0,
+      outgoing: incoming ? 0 : number_(row['Jumlah']),
+      source: 'Dana Kebajikan',
+      refId: row['ID Transaksi']
+    });
+  });
+  getObjects_('Aset Tetap').forEach(function(row) {
+    if (row['Status'] === 'Dihapus') return;
+    add({
+      date: row['Tanggal Perolehan'],
+      accountCode: String(row['Kode Akun Aset'] || '1241'),
+      category: 'Perolehan Aset Tetap',
+      description: 'Perolehan aset - ' + row['Nama Aset'],
+      incoming: 0,
+      outgoing: number_(row['Harga Perolehan']),
+      source: 'Aset Tetap',
+      refId: row['ID Aset']
+    });
+  });
   manualRows.forEach(function(row) {
     add({
       date: row['Tanggal'],
+      accountCode: row['Kode Akun'],
+      accountName: row['Nama Akun'],
       category: row['Kategori'],
       description: row['Deskripsi'],
       incoming: row['Masuk'],
       outgoing: row['Keluar'],
+      cashCode: row['Kode Kas/Bank'],
+      paymentMethod: row['Pembayaran Via'],
       source: row['Sumber Transaksi'],
       refId: row['Ref ID']
     });
   });
 
-  entries.sort(function(a, b) { return a[1] - b[1]; });
-  entries.forEach(function(row, index) {
-    row[0] = 'KAS-' + String(index + 1).padStart(7, '0');
+  entries = entries.filter(function(row) {
+    return row.incoming > 0 || row.outgoing > 0;
+  });
+  entries.sort(function(a, b) {
+    return a.date - b.date ||
+      String(a.refId).localeCompare(String(b.refId)) ||
+      String(a.category).localeCompare(String(b.category));
+  });
+  var running = openingBalance;
+  var rows = entries.map(function(row, index) {
+    running += row.incoming - row.outgoing;
+    return [
+      'KAS-' + String(index + 1).padStart(7, '0'),
+      row.date,
+      row.accountCode,
+      row.accountName,
+      row.category,
+      row.description,
+      row.incoming,
+      row.outgoing,
+      running,
+      row.cashCode,
+      row.paymentMethod,
+      row.source,
+      row.refId
+    ];
   });
   if (cashSheet.getLastRow() > 1) {
     cashSheet.getRange(2, 1, cashSheet.getLastRow() - 1, SCHEMA.Kas.length).clearContent();
   }
-  if (entries.length) {
-    cashSheet.getRange(2, 1, entries.length, SCHEMA.Kas.length).setValues(entries);
+  if (rows.length) {
+    cashSheet.getRange(2, 1, rows.length, SCHEMA.Kas.length).setValues(rows);
   }
   SpreadsheetApp.flush();
-  return { success: true, message: 'Ledger kas berhasil disinkronkan.' };
+  return {
+    success: true,
+    message: 'Rincian Kas berhasil disinkronkan.',
+    rows: rows.length,
+    openingBalance: openingBalance,
+    closingBalance: running
+  };
 }
 
 function appendSaving_(data) {
@@ -3538,10 +5340,30 @@ function appendSaving_(data) {
 }
 
 function appendCash_(data) {
+  var accounts = getCoaMap_();
+  var accountCode = String(
+    data.accountCode ||
+    cashCounterpartAccountCode_(
+      data.category,
+      data.description,
+      data.incoming,
+      data.outgoing
+    )
+  );
+  var cashCode = String(data.cashCode || cashAccountCode_());
   getDb_().getSheetByName('Kas').appendRow([
     nextId_('Kas', 'KAS-', 7), parseDate_(data.date) || new Date(),
-    data.category, data.description, number_(data.incoming), number_(data.outgoing),
-    data.source, data.refId
+    accountCode,
+    accounts[accountCode] ? accounts[accountCode]['Nama Akun'] : '',
+    data.category,
+    data.description,
+    number_(data.incoming),
+    number_(data.outgoing),
+    '',
+    cashCode,
+    accounts[cashCode] ? accounts[cashCode]['Nama Akun'] : 'Kas/Bank',
+    data.source,
+    data.refId
   ]);
 }
 
@@ -3563,9 +5385,9 @@ function deleteCashEntriesByRef_(source, refId) {
   if (!sheet || sheet.getLastRow() < 2) return;
   var values = sheet.getRange(2, 1, sheet.getLastRow() - 1, SCHEMA.Kas.length).getValues();
   for (var index = values.length - 1; index >= 0; index--) {
-    var cashSource = String(values[index][6]);
+    var cashSource = String(values[index][11]);
     if ((cashSource === String(source) || cashSource === 'Migrasi') &&
-        String(values[index][7]) === String(refId)) {
+        String(values[index][12]) === String(refId)) {
       sheet.deleteRow(index + 2);
     }
   }
@@ -3819,6 +5641,266 @@ function nextId_(sheetName, prefix, digits) {
     });
   }
   return prefix + String(max + 1).padStart(digits, '0');
+}
+
+function getCoaMap_() {
+  var map = {};
+  getObjects_('COA').forEach(function(row) {
+    map[String(row['Kode Akun'])] = row;
+  });
+  return map;
+}
+
+function inferAccountType_(code, name) {
+  var first = String(code || '').charAt(0);
+  if (first === '1') return 'Aset';
+  if (first === '2') return 'Liabilitas';
+  if (first === '3') return 'Ekuitas';
+  if (first === '4' || first === '6') return 'Pendapatan';
+  if (first === '5' || first === '7' || first === '8') return 'Beban';
+  var text = String(name || '').toLowerCase();
+  if (/pendapatan|penjualan|margin/.test(text)) return 'Pendapatan';
+  if (/beban|biaya/.test(text)) return 'Beban';
+  if (/hutang|kewajiban/.test(text)) return 'Liabilitas';
+  if (/modal|ekuitas|cadangan/.test(text)) return 'Ekuitas';
+  return 'Aset';
+}
+
+function defaultReportGroup_(type) {
+  return {
+    Aset: 'Aset Lainnya',
+    Liabilitas: 'Liabilitas Lainnya',
+    Ekuitas: 'Ekuitas',
+    Pendapatan: 'Pendapatan Usaha',
+    Beban: 'Beban Operasional'
+  }[type] || 'Lainnya';
+}
+
+function defaultNormalBalance_(type) {
+  return ['Liabilitas', 'Ekuitas', 'Pendapatan'].indexOf(type) >= 0
+    ? 'Kredit'
+    : 'Debet';
+}
+
+function cashAccountCode_() {
+  var settings = getSettingsInternal_();
+  var code = String(settings.akun_kas_default || '1111');
+  return getCoaMap_()[code] ? code : '1111';
+}
+
+function getCashOpeningBalance_() {
+  return getObjects_('COA').filter(function(row) {
+    return row['Kelompok Laporan'] === 'Kas dan Setara Kas' &&
+      row['Aktif'] !== 'Tidak';
+  }).reduce(function(total, row) {
+    return total + number_(row['Saldo Awal Debet']) -
+      number_(row['Saldo Awal Kredit']);
+  }, 0);
+}
+
+function cashCounterpartAccountCode_(category, description, incoming, outgoing) {
+  var text = String(category || '') + ' ' + String(description || '');
+  if (/simpanan pokok/i.test(text)) return '3111';
+  if (/simpanan wajib/i.test(text)) return '3121';
+  if (/simpanan sukarela/i.test(text)) return '2151';
+  if (/pencairan pinjaman|pencairan pembiayaan|pembayaran angsuran|angsuran pokok/i.test(text)) {
+    return '1132';
+  }
+  if (/pendapatan margin|margin angsuran/i.test(text)) return '4111';
+  if (/biaya admin/i.test(text) && number_(incoming) > 0) return '4121';
+  if (/dana kebajikan|infak|zakat|sosial/i.test(text)) return '2161';
+  if (/aset tetap|perolehan aset/i.test(text)) return '1241';
+  return number_(outgoing) > 0 ? '7291' : '4131';
+}
+
+function journalSourcePrefix_(source) {
+  return {
+    'Saldo Awal': 'SAL',
+    Simpanan: 'SMP',
+    Pinjaman: 'PJM',
+    Angsuran: 'ANG',
+    'Kas Manual': 'KAS',
+    Manual: 'KAS',
+    'Aset Tetap': 'AST',
+    'Dana Kebajikan': 'DKB',
+    'Anggota Keluar': 'KLR'
+  }[String(source)] || 'KAS';
+}
+
+function cashGroupDescription_(group) {
+  var descriptions = group.descriptions.filter(function(value, index, rows) {
+    return value && rows.indexOf(value) === index;
+  });
+  if (group.source === 'Angsuran') {
+    var match = String(descriptions[0] || '').match(/ - (.+)$/);
+    return 'Pembayaran angsuran - ' + (match ? match[1] : group.refId);
+  }
+  if (group.source === 'Pinjaman') {
+    return group.direction === 'OUT'
+      ? String(descriptions.filter(function(text) {
+          return /pencairan/i.test(text);
+        })[0] || descriptions[0] || 'Pencairan pembiayaan')
+      : String(descriptions.filter(function(text) {
+          return /admin/i.test(text);
+        })[0] || descriptions[0] || 'Penerimaan biaya administrasi');
+  }
+  return descriptions.join(' / ') || group.refId;
+}
+
+function savingAccountCode_(savingType) {
+  return {
+    'Simpanan Pokok': '3111',
+    'Simpanan Wajib': '3121',
+    'Simpanan Sukarela': '2151'
+  }[savingType] || '2151';
+}
+
+function depreciationAccountCode_(assetAccountCode) {
+  var code = String(assetAccountCode || '');
+  if (code.indexOf('122') === 0) return '1251';
+  if (code.indexOf('123') === 0) return '1252';
+  return '1253';
+}
+
+function systemJournalId_(prefix, refId) {
+  return 'SYS-' + cleanText_(prefix, 10) + '-' +
+    cleanText_(refId, 80).replace(/[^A-Za-z0-9.-]/g, '');
+}
+
+function accountingPeriod_(filter) {
+  filter = filter || {};
+  var now = new Date();
+  return resolvePeriod_({
+    period: 'custom',
+    startDate: filter.startDate ||
+      Utilities.formatDate(new Date(now.getFullYear(), 0, 1), APP_TIMEZONE, 'yyyy-MM-dd'),
+    endDate: filter.endDate ||
+      Utilities.formatDate(now, APP_TIMEZONE, 'yyyy-MM-dd')
+  });
+}
+
+function serializePeriod_(period) {
+  return {
+    start: formatDate_(period.start),
+    end: formatDate_(period.end)
+  };
+}
+
+function statementLine_(item, amount) {
+  return {
+    code: item.code,
+    name: item.name,
+    group: item.reportGroup || 'Lainnya',
+    amount: amount
+  };
+}
+
+function groupStatementLines_(lines) {
+  var groups = {};
+  lines.forEach(function(line) {
+    if (!groups[line.group]) groups[line.group] = [];
+    groups[line.group].push(line);
+  });
+  return Object.keys(groups).map(function(name) {
+    var items = groups[name];
+    return {
+      name: name,
+      items: items,
+      total: items.reduce(function(total, item) { return total + item.amount; }, 0)
+    };
+  });
+}
+
+function monthsBetween_(start, end) {
+  var months = (end.getFullYear() - start.getFullYear()) * 12 +
+    end.getMonth() - start.getMonth();
+  if (end.getDate() >= start.getDate()) months += 1;
+  return Math.max(0, months);
+}
+
+function writeExportSheet_(sheet, rows) {
+  if (!rows || !rows.length) rows = [['Tidak ada data']];
+  var width = rows.reduce(function(max, row) {
+    return Math.max(max, row.length);
+  }, 1);
+  var normalized = rows.map(function(row) {
+    var result = row.slice();
+    while (result.length < width) result.push('');
+    return result;
+  });
+  sheet.clear();
+  sheet.getRange(1, 1, normalized.length, width).setValues(normalized);
+  sheet.setFrozenRows(1);
+  sheet.getRange(1, 1, 1, width)
+    .setBackground('#0D3B66')
+    .setFontColor('#FFFFFF')
+    .setFontWeight('bold');
+  if (normalized.length > 1) {
+    sheet.getRange(2, 1, normalized.length - 1, width)
+      .setVerticalAlignment('middle');
+  }
+  sheet.getDataRange().setWrap(true);
+  sheet.autoResizeColumns(1, width);
+  for (var column = 1; column <= width; column++) {
+    if (sheet.getColumnWidth(column) > 280) sheet.setColumnWidth(column, 280);
+  }
+}
+
+function balanceSheetExportRows_(report) {
+  var rows = [['LAPORAN POSISI KEUANGAN', '', ''], ['Per ' + formatDisplayDate_(report.asOf), '', '']];
+  rows.push(['AKTIVA', 'Kode', 'Jumlah']);
+  report.assets.forEach(function(group) {
+    rows.push([group.name, '', group.total]);
+    group.items.forEach(function(item) {
+      rows.push(['  ' + item.name, item.code, item.amount]);
+    });
+  });
+  rows.push(['TOTAL AKTIVA', '', report.totals.assets], ['', '', '']);
+  rows.push(['LIABILITAS', 'Kode', 'Jumlah']);
+  report.liabilities.forEach(function(group) {
+    rows.push([group.name, '', group.total]);
+    group.items.forEach(function(item) {
+      rows.push(['  ' + item.name, item.code, item.amount]);
+    });
+  });
+  rows.push(['TOTAL LIABILITAS', '', report.totals.liabilities], ['', '', '']);
+  rows.push(['EKUITAS', 'Kode', 'Jumlah']);
+  report.equity.forEach(function(group) {
+    rows.push([group.name, '', group.total]);
+    group.items.forEach(function(item) {
+      rows.push(['  ' + item.name, item.code, item.amount]);
+    });
+  });
+  rows.push(['TOTAL EKUITAS', '', report.totals.equity]);
+  rows.push(['TOTAL LIABILITAS DAN EKUITAS', '', report.totals.liabilitiesAndEquity]);
+  rows.push(['SELISIH NERACA', '', report.totals.difference]);
+  return rows;
+}
+
+function incomeStatementExportRows_(report) {
+  var rows = [
+    ['LAPORAN LABA RUGI', '', ''],
+    ['Periode ' + formatDisplayDate_(report.period.start) + ' - ' +
+      formatDisplayDate_(report.period.end), '', ''],
+    ['PENDAPATAN', 'Kode', 'Jumlah']
+  ];
+  report.revenues.forEach(function(group) {
+    rows.push([group.name, '', group.total]);
+    group.items.forEach(function(item) {
+      rows.push(['  ' + item.name, item.code, item.amount]);
+    });
+  });
+  rows.push(['TOTAL PENDAPATAN', '', report.totalRevenue], ['', '', '']);
+  rows.push(['BEBAN', 'Kode', 'Jumlah']);
+  report.expenses.forEach(function(group) {
+    rows.push([group.name, '', group.total]);
+    group.items.forEach(function(item) {
+      rows.push(['  ' + item.name, item.code, item.amount]);
+    });
+  });
+  rows.push(['TOTAL BEBAN', '', report.totalExpense]);
+  rows.push(['SISA HASIL USAHA / LABA BERSIH', '', report.netIncome]);
+  return rows;
 }
 
 function resolvePeriod_(filter) {
